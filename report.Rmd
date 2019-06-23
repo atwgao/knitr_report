@@ -1,0 +1,21 @@
+In this shiny test example I make a really simple regression of the mtcars data... Which i'm guessing you uploaded properly because It's not on the server:
+
+```{r model, collapse=TRUE}
+options(digits = 4)
+fit <- lm(regFormula(), data = mtcars)
+b   <- coef(fit)
+summary(fit)
+```
+
+The fitting result is $mpg = `r b[1]` + `r b[2]``r input$x`$.
+Below is a scatter plot with the regression line. Now look at that !!! Right ? I know !
+
+```{r plot, fig.height=5}
+par(mar = c(4, 4, 1, 1))
+plot(regFormula(), data = mtcars, pch = 19, col = 'gray')
+abline(fit, col = 'red', lwd = 2)
+```
+
+hope this was fun, I know this report means absolutely nothing but it means it's possible ... which s the whole poit ... 
+
+:)
