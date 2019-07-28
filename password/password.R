@@ -1,0 +1,207 @@
+rm(list = ls())
+library(shiny)
+library("stringr")
+
+Logged = FALSE;
+my_username <- "gao"
+my_password <- "gao"
+
+user_vec <- c("gao" = "123",
+              "pearl" = "321")
+
+ui1 <- function(){
+  tagList(
+    div(id = "login",
+        wellPanel(textInput("userName", "Username"),
+                  passwordInput("passwd", "Password"),
+                  br(),actionButton("Login", "Log in"))),
+    tags$style(type="text/css", "#login {font-size:10px;   text-align: left;position:absolute;top: 40%;left: 50%;margin-top: -100px;margin-left: -150px;}")
+  )}
+
+ui2 <- function(){
+  fluidPage(
+    #Download Data########################################################
+    
+    #title = 'Download reports',
+    sidebarLayout(
+      sidebarPanel(
+        # Input: Select a file ----
+        fileInput("file1", "Choose CSV File",
+                  multiple = FALSE,
+                  accept = c("text/csv",
+                             "text/comma-separated-values,text/plain",
+                             ".csv")),
+        
+        # Horizontal line ----
+        tags$hr(),
+        
+        # Input: Checkbox if file has header ----
+        checkboxInput("header", "Header", TRUE),
+        
+        # Input: Select separator ----
+        radioButtons("sep", "Separator",
+                     choices = c(Comma = ",",
+                                 Semicolon = ";",
+                                 Tab = "\t"),
+                     selected = ","),
+        
+        # Input: Select quotes ----
+        radioButtons("quote", "Quote",
+                     choices = c(None = "",
+                                 "Double Quote" = '"',
+                                 "Single Quote" = "'"),
+                     selected = '"'),
+        
+        # Horizontal line ----
+        tags$hr(),
+        
+        # Input: Select number of rows to display ----
+        radioButtons("disp", "Display",
+                     choices = c(Head = "head",
+                                 All = "all"),
+                     selected = "head"),
+        helpText(),
+        selectInput('x', 'Build a regression model of mpg against:',
+                    choices = names(mtcars)[-1]),
+        radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
+                     inline = TRUE),
+        downloadButton('downloadReport')
+      ),
+      mainPanel(
+        
+        fluidRow(
+          
+          column(8,
+                 tableOutput("contents")       
+          ),
+          
+          column(4,
+                 plotOutput('regPlot')
+          )
+        )
+        
+      )
+    )
+  )
+}
+
+ui = (htmlOutput("page"))
+
+
+
+server = (function(input, output,session) {
+  
+  USER <- reactiveValues(Logged = Logged)
+  
+
+  observe({ 
+    if (USER$Logged == FALSE) {
+      if (!is.null(input$Login)) {
+        if (input$Login > 0) {
+          Username <- isolate(input$userName)
+          Password <- isolate(input$passwd)
+          #Id.username <- which(my_username == Username)
+          #Id.password <- which(my_password == Password)
+          #if (length(Id.username) > 0 & length(Id.password) > 0) {
+            
+            if (str_to_lower(Username) %in% names(user_vec)) {
+              if (Password == unname(user_vec[str_to_lower(Username)])) {
+            #if (Id.username == Id.password) {
+              USER$Logged <- TRUE
+            }
+          }
+        } 
+      }
+    }    
+  })
+  
+  observe({
+    if (USER$Logged == FALSE) {
+      
+      output$page <- renderUI({
+        div(class="outer",do.call(bootstrapPage,c("",ui1())))
+      })
+    }
+    if (USER$Logged == TRUE) 
+    {
+      output$page <- renderUI({
+        div(class="outer",do.call(fluidpage,c(inverse=TRUE,title = paste("You're logged in as", isolate(input$userName)),ui2())))
+      })
+      print(ui)
+    }
+  })
+  
+  function(input, output) {
+    
+    filedata <- reactive({
+      req(input$file1)
+      # when reading semicolon separated files,
+      # having a comma separator causes `read.csv` to error
+      tryCatch(
+        {
+          df <- read.csv(input$file1$datapath,
+                         header = input$header,
+                         sep = input$sep,
+                         quote = input$quote)
+        },
+        error = function(e) {
+          # return a safeError if a parsing error occurs
+          stop(safeError(e))
+        }
+      )
+      
+      return(df)
+    })
+    
+    #Download DATA ########################################
+    output$contents <- renderTable({
+      
+      if(input$disp == "head") {
+        return(head(filedata()))
+      }
+      else {
+        return(filedata())
+      }
+      # input$file1 will be NULL initially. After the user selects
+      # and uploads a file, head of that data file by default,
+      # or all rows if selected, will be shown.
+    })
+    
+    regFormula <- reactive({
+      as.formula(paste('mpg ~', input$x))
+    })
+    
+    output$regPlot <- renderPlot({
+      par(mar = c(4, 4, .1, .1))
+      plot(regFormula(), data = filedata(), pch = 19)
+    })
+    
+    output$downloadReport <- downloadHandler(
+      filename = function() {
+        paste('my-report', sep = '.', switch(
+          input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
+        ))
+      },
+      
+      content = function(file) {
+        src <- normalizePath('report.Rmd')
+        # temporarily switch to the temp dir, in case you do not have write
+        # permission to the current working directory
+        owd <- setwd(tempdir())
+        on.exit(setwd(owd))
+        file.copy(src, 'report.Rmd', overwrite = TRUE)
+        
+        library(rmarkdown)
+        out <- render('report.Rmd', switch(
+          input$format,
+          PDF = pdf_document(), HTML = html_document(), Word = word_document()
+        ))
+        file.rename(out, file)
+      }
+    )
+    
+  }
+  
+})
+
+runApp(list(ui = ui, server = server))
