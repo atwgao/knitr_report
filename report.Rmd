@@ -1,21 +1,38 @@
-In this shiny test example I make a really simple regression of the mtcars data... Which i'm guessing you uploaded properly because It's not on the server:
+---
+title: "ASIS_Report_1"
+author: "G.Maribe"
+date: "14 August 2019"
+output: html_document
+---
 
-```{r model, collapse=TRUE}
-options(digits = 4)
-fit <- lm(regFormula(), data = mtcars)
-b   <- coef(fit)
-summary(fit)
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
 ```
 
-The fitting result is $mpg = `r b[1]` + `r b[2]``r input$x`$.
-Below is a scatter plot with the regression line. Now look at that !!! Right ? I know !
-
-```{r plot, fig.height=5}
-par(mar = c(4, 4, 1, 1))
-plot(regFormula(), data = mtcars, pch = 19, col = 'gray')
-abline(fit, col = 'red', lwd = 2)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 ```
 
-hope this was fun, I know this report means absolutely nothing but it means it's possible ... which s the whole poit ... 
 
-:)
+```{r echo = FALSE, fig.margin=TRUE, results = "asis"}
+load("write_info.RData")
+input <- our_info
+
+template <- paste("
+
+%s. %s.
+
+")
+# dont't forget the newline
+
+for (i in seq(nrow(input)-1)) {
+current <- input[i, ]
+cat(paste0("# ",current$module,"\n"))
+cat(paste0("# Summary \n"))
+cat(paste0(current$decision, "\n"))
+cat(paste0("![](", "pic", i, ".pdf){width=65%}","\n"))
+cat(paste0("### Evidence \n"))
+cat(sprintf(template, current$summary_stat, current$decision))
+}
+```

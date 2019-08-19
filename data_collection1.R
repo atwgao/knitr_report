@@ -1,4 +1,5 @@
 #data collection page
+library(tidyverse)
 data_collection_ui1 <- function(){
   fluidPage(
     #Download Data########################################################
@@ -45,11 +46,6 @@ data_collection_ui1 <- function(){
         tags$head(tags$script(src = "message-handler.js")),
         actionButton("next_button",label = HTML("<span class='small'>Next <i class='glyphicon glyphicon-arrow-right'></i></span>"))
         
-        # selectInput('x', 'Build a regression model of mpg against:',
-        #             choices = names(mtcars)[-1]),
-        # radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
-        #              inline = TRUE),
-        # downloadButton('downloadReport')
       ),
       mainPanel(
         DT::dataTableOutput("contents", width = "auto")

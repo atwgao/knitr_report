@@ -36,11 +36,6 @@ data_collection_ui2 <- function(){
         # Horizontal line ----
         tags$hr(),
          
-        #Input: Select number of rows to display ----
-        # radioButtons("disp", "Display",
-        #              choices = c(Head = "head",
-        #                          All = "all"),
-        #              selected = "head"),
         helpText(),
         tags$head(tags$script(src = "message-handler.js")),
         actionButton("next_button",label = HTML("<span class='small'>Done <i class='glyphicon glyphicon-ok'></i></span>"))
