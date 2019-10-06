@@ -104,11 +104,11 @@ outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term=
 
   observeEvent(input$generate, {
     if(file.exists("complete_data.RData")) load("complete_data.RData")
-    campus       <- isolate(input$campus)
-    faculty      <- isolate(input$faculty)
-    semester     <- isolate(input$semester)
-    tutor.type   <- isolate(input$tutor.type)
-    Modules      <- isolate(input$modular)
+    campus       <<- isolate(input$campus)
+    faculty      <<- isolate(input$faculty)
+    semester     <<- isolate(input$semester)
+    tutor.type   <<- isolate(input$tutor.type)
+    .Modules     <<- isolate(input$modular)
     names(GroupedData)[names(GroupedData)=="GR_12_ADSCORE"]<-"AP"
     
     Freq3<-GroupedData%>%filter(Campus==campus,FACULTY==faculty,Term==semester)%>%group_by(Attendee,Module.Code,FINAL.MARK,AP,freq)%>%dplyr::summarize()%>%as.data.frame() ##,Tutor.Type==tutor.type
@@ -118,16 +118,18 @@ outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term=
     source("Decision_Functions.R")
     source("post_hoc.R")
     
+    #from the t-test I need 4 results, 4 from anova and 4 from corr for every module
+    if(.Modules=="Select All"){Modules<-NOR_check%>%filter(Tutor.Type=="NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
+    }else{Modules<-unlist(strsplit(.Module,","))}
+    # AnMods<-vector()
+    # summary_table <- array(NA,dim=c(length(Modules),4))
+    
     #Gather all the information needed to build the report
     our_info <- data.frame(matrix(ncol=17,nrow=(1+length(Modules))))
     names(our_info) <- c("module","evid","table1","table2","table3","table4","decision21",
                          "decision","decision3","decision4", "decision5","decision7","decision8",
                          "summary_stat","summary_decision1","summary_decision2","summary_decision4")
-    #from the t-test I need 4 results, 4 from anova and 4 from corr for every module
-    # if(.Module=="Select All"){Modules<-NOR_check%>%filter(Tutor.Type=="NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
-    # }else{Modules<-unlist(strsplit(.Module,","))}
-    # AnMods<-vector()
-    # summary_table <- array(NA,dim=c(length(Modules),4))
+
     group<-function(x){
       if(x==0){
         res<-"Group1"
@@ -141,8 +143,8 @@ outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term=
     i <- 0
     while(i <= length(Modules)){
       if(i==0){
-        if(all(Modules=="Select All")){
-          Module<<-"Faculty"
+        if(all(.Modules=="Select All")){
+          Module <<-"Faculty"
           Freq <- Freq3
           Freq$Groupvec <- sapply(Freq$freq,group)
           i <- 1
@@ -168,11 +170,10 @@ outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term=
           our_info[i,]$decision5 <- aaa$decision5
           
           tryCatch({
-            pdf(file=paste("images/pic",i,".pdf",sep=""),width = 6,height=5,pointsize = 20)
+            pdf(file=paste("images/pic",i,".pdf",sep=""),width = 8,height=8,pointsize = 18)
             print(funny(Freq))
+            dev.off()
           }, error = function(e) return(NULL), warning = function(w) return(NULL))
-          dev.off()
-          
         }else{
           i <- 1
         }
@@ -259,8 +260,8 @@ outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term=
       tryCatch({
         pdf(file=paste("images/pic",i,".pdf",sep=""),width = 8,height=8,pointsize = 18)
         print(funny(Freq))
+        dev.off()
       }, error = function(e) return(NULL), warning = function(w) return(NULL))
-      dev.off()
       print(length(Modules)-i+1)
     }
 save(our_info, file = "write_info.RData")
@@ -289,10 +290,10 @@ content = function(file) {
   # permission to the current working directory
   owd <- setwd(tempdir())
   on.exit(setwd(owd))
-
+  #on.exit(unlink(paste0(normalizePath(tempdir()), "/", dir(tempdir())), recursive = TRUE))
  
   library(rmarkdown)
-  out <- rmarkdown::render(paste(tempfolder,"\\report.Rmd",sep=""), switch(
+  out <- rmarkdown::render(paste(tempfolder,"/report.Rmd",sep=""), switch(
     input$format,
     PDF = pdf_document(), HTML = html_document(), Word = word_document()
   ) )
@@ -303,3 +304,4 @@ content = function(file) {
 
   )
 }
+
