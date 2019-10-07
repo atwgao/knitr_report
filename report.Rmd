@@ -1,13 +1,13 @@
 ---
-title: "ASIS_Report_1"
-author: "G.Maribe"
-date: "14 August 2019"
-output: html_document
+title: "ASIS report"
+output:
+  html_document:
+    toc: true
+    theme: united
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+author: 'CTL ASIS user'
 ---
 
-```{r, include=FALSE}
-options(tinytex.verbose = TRUE)
-```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -19,20 +19,31 @@ knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 load("write_info.RData")
 input <- our_info
 
-template <- paste("
-
-%s. %s.
-
-")
+# template <- paste("
+# 
+# %s %s
+# 
+# ")
 # dont't forget the newline
+
 
 for (i in seq(nrow(input)-1)) {
 current <- input[i, ]
 cat(paste0("# ",current$module,"\n"))
-cat(paste0("# Summary \n"))
-cat(paste0(current$decision, "\n"))
+cat(paste0("## Summary \n"))
+cat(paste0(current$summary_decision1, "\n"))
+cat(paste0(current$summary_decision2, "\n"))
+cat(paste0(current$summary_decision4, "\n"))
+cat(paste0("\n\n"))
 cat(paste0("![](", "pic", i, ".pdf){width=65%}","\n"))
-cat(paste0("### Evidence \n"))
-cat(sprintf(template, current$summary_stat, current$decision))
+cat(paste0("\n\n"))
+cat(paste0("## Evidence \n"))
+cat(paste0(current$summary_stat, "\n\n"))
+cat(paste0(current$decision, "\n\n"))
+cat(paste0(current$decision3, "\n\n"))
+cat(paste0(current$decision4, "\n\n"))
+cat(paste0(current$decision5, "\n\n"))
+cat(paste0(current$decision7, "\n\n"))
+cat(paste0(current$decision8, "\n\n"))
 }
 ```

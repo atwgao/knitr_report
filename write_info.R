@@ -130,3 +130,11 @@ while(i <= length(Modules)){
   print(length(Modules)-i)
 
 }
+
+for(i in 1:nrow(our_info)){
+  for(j in 1:ncol(our_info)){
+    if(is.na(our_info[i,j])){
+      our_info[i,j]  = ""
+    }
+  }
+}

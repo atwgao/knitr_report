@@ -170,7 +170,7 @@ corr<-function(Freq){
     summary_decision4 <- ""
   }else if(pptest$p.value<0.05&ptest$p.value<0.05){
     table4            <- "Yes*"
-    summary_decision4 <- paste("even when previous academic performance was taken into account (AP Score).")
+    summary_decision4 <- paste("Even when previous academic performance was taken into account (AP Score).")
     decision8         <- paste("When controlling for previous academic performance (AP Score), the correlation",state(pptest$estimate),adj2(ptest$estimate,pptest$estimate),adj(pptest$estimate),"positive and remained significant (r =",paste(round(pptest$estimate,4),";",sep=""),"p =",Gformat(pptest$p.value),">0.05).")
   }else if(pptest$p.value>0.05&ptest$p.value<0.05){
     table4            <- "No*"
