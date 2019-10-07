@@ -44,30 +44,37 @@ consol_data <- consol_data[consol_data$Module.Code%in%Modules,]
 
 .Excluded<-(mark.trim[!mark.trim$UID%in%att[att$Tutor.Type=="NOR",]$UID,])
 
-.GroupedData1<-consol_data%>%group_by(Attendee,Module.Code,YEAR,Campus,FACULTY,GR_12_ADSCORE,FINAL.MARK,Tutor.Type)%>%summarise(freq=n())
-.GroupedData2<-.Excluded%>%group_by(Attendee,Module.Code,YEAR,Campus,FACULTY,GR_12_ADSCORE,FINAL.MARK)%>%summarise(Tutor.Type="NOR",freq=0)#%>%mutate(Tutor.Type="NOR",freq=0)
+.GroupedData1<-consol_data %>% group_by(Attendee,Module.Code,YEAR,Campus,FACULTY,GR_12_ADSCORE,FINAL.MARK,Tutor.Type)%>%summarise(freq=n())
+.GroupedData2<-.Excluded %>% group_by(Attendee,Module.Code,YEAR,Campus,FACULTY,GR_12_ADSCORE,FINAL.MARK)%>%summarise(Tutor.Type="NOR",freq=0)#%>%mutate(Tutor.Type="NOR",freq=0)
 
 colnames(.GroupedData2)<-colnames(.GroupedData1)
 GroupedData<-rbind(.GroupedData1,.GroupedData2)
 
+#Take only the NOR Modules
+
+GroupedData <- GroupedData%>%filter(Tutor.Type=="NOR")
+
 #count how many students in each module attended 0,1 or more tutorials
-chk_mod <- GroupedData%>%add_count(Module.Code)%>%group_by(Module.Code,freq,n)%>%summarise(zero_attendance=n())
+chk_mod <- GroupedData %>% group_by(Module.Code) %>% add_count(Module.Code)
+
+chk_mod <- chk_mod %>% group_by(Module.Code,freq,n) %>%dplyr::summarise(zero_attendance=n())
+
 
 #Of those students extract only the one who attended zero tutorials and 
 #compare with the number of students who attended more than 0. Add a column 
 #of percentage number of students who didn't attend tutorials (missing column)
 
-chk_mod <- chk_mod %>%filter(freq==0)%>%mutate(missing = 100*zero_attendance/n)
+chk_mod <- chk_mod %>% filter(freq==0)%>%mutate(missing = 100*zero_attendance/n)
 
 #Remove from Groupdata, modules  with %missing > 90% [more than 10% of students Modules in good_mods attendad tutorials]
 good_mods <- chk_mod %>% filter(missing < 90) %>% dplyr::select(Module.Code)%>%distinct(Module.Code) %>% .$Module.Code 
 
 GroupedData <- GroupedData%>%filter(Module.Code%in%good_mods)
 
-GroupedData%>%group_by(Module.Code,freq) %>% summarise()%>% tally()
-.x<-as.character(GroupedData$Module.Code)
+GroupedData%>%group_by(Module.Code,freq) %>% dplyr::summarise()%>% tally()
+x<-as.character(GroupedData$Module.Code)
 .FM<-as.character(GroupedData$FINAL.MARK)
-.i<-c(1:length(.x))
+.i<-c(1:length(x))
 #add their term by taking the second last number and checking if it's even or odd
 GroupedData$Term<-sapply(.i,function(i) return(ifelse(as.numeric(substr(x[i],(nchar(x[i])-1),(nchar(x[i])-1)))%%2==0,"SEM2","SEM1")))
 GroupedData<-GroupedData%>%mutate(success=ifelse(FINAL.MARK>=50,1,0))

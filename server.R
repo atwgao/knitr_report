@@ -28,8 +28,8 @@ function(input, output, session) {
     
   })
   
-
-filedata <- reactive({
+  
+  filedata <- reactive({
     req(input$file1)
     # when reading semicolon separated files,
     # having a comma separator causes `read.csv` to error
@@ -45,22 +45,22 @@ filedata <- reactive({
         stop(safeError(e))
       }
     )
-  
-return(df)
+    
+    return(df)
   })
   
-#Download DATA ########################################
+  #Download DATA ########################################
   
-output$contents <- DT::renderDataTable(
-      filedata(),
+  output$contents <- DT::renderDataTable(
+    filedata(),
     options = list(scrollX = TRUE))
-
-observe(e <<- 0)
+  
+  observe(e <<- 0)
   observeEvent(input$next_button, {
     dat_temp <- filedata()
     data_being_collected <<- "performance";
     output$page <- renderUI({
-    div(class="outer",do.call(fluidPage,c(inverse=TRUE,title = paste("You're logged in as", isolate(input$userName)),data_collection_ui2())))
+      div(class="outer",do.call(fluidPage,c(inverse=TRUE,title = paste("You're logged in as", isolate(input$userName)),data_collection_ui2())))
     })
     print(ui)
     e <<- e + 1
@@ -82,16 +82,16 @@ observe(e <<- 0)
   })
   
   
-outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term==input$semester)
-  if(file.exists("complete_data.RData")) load("complete_data.RData")
-  req(input$campus,input$faculty,input$semester)
-  x <- GroupedData%>%filter(Campus==input$campus,FACULTY==input$faculty,Term==input$semester)%>%distinct(Module.Code)
+  outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term==input$semester)
+    if(file.exists("complete_data.RData")) load("complete_data.RData")
+    req(input$campus,input$faculty,input$semester)
+    x <- GroupedData%>%filter(Campus==input$campus,FACULTY==input$faculty,Term==input$semester)%>%distinct(Module.Code)
     mydata = c("Select All",x)
   })
-
+  
   observe({
     updateSelectInput(session, "modular",
-                         choices = outVar()
+                      choices = outVar()
     )})
   
   observe({
@@ -101,17 +101,27 @@ outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term=
       )
     }
   })
-
+  
   observeEvent(input$generate, {
     if(file.exists("complete_data.RData")) load("complete_data.RData")
-    campus       <<- isolate(input$campus)
-    faculty      <<- isolate(input$faculty)
-    semester     <<- isolate(input$semester)
-    tutor.type   <<- isolate(input$tutor.type)
-    .Modules     <<- isolate(input$modular)
+    campus       <- isolate(input$campus)
+    faculty      <- isolate(input$faculty)
+    semester     <- isolate(input$semester)
+    tutor.type   <- isolate(input$tutor.type)
+    .Modules     <- isolate(input$modular)
     names(GroupedData)[names(GroupedData)=="GR_12_ADSCORE"]<-"AP"
+    Freq3<-GroupedData%>%filter(Campus==campus,FACULTY==faculty,Term==semester, Tutor.Type==tutor.type)%>%group_by(Attendee,Module.Code,FINAL.MARK,AP,freq)%>%dplyr::summarize()%>%as.data.frame() ##,Tutor.Type==tutor.type
     
-    Freq3<-GroupedData%>%filter(Campus==campus,FACULTY==faculty,Term==semester)%>%group_by(Attendee,Module.Code,FINAL.MARK,AP,freq)%>%dplyr::summarize()%>%as.data.frame() ##,Tutor.Type==tutor.type
+    # chk_mod <- Freq3 %>% group_by(Module.Code) %>% add_count(Module.Code)
+    # chk_mod <- chk_mod %>% group_by(Module.Code,freq,n) %>%dplyr::summarise(zero_attendance=n())
+    # #Of those students extract only the one who attended zero tutorials and 
+    # #compare with the number of students who attended more than 0. Add a column 
+    # #of percentage number of students who didn't attend tutorials (missing column)
+    # chk_mod <- chk_mod %>% filter(freq==0)%>%mutate(missing = 100*zero_attendance/n)
+    # #Remove from Freq3, modules  with %missing > 90% [more than 10% of students Modules in good_mods attendad tutorials]
+    # good_mods <- chk_mod %>% filter(missing < 90) %>% dplyr::select(Module.Code)%>%distinct(Module.Code) %>% .$Module.Code 
+    # Freq3 <- Freq3%>%filter(Module.Code%in%good_mods)
+    
     NOR_check <- GroupedData%>%filter(Campus==campus,FACULTY==faculty,Term==semester)%>%group_by(Module.Code,Tutor.Type)%>%dplyr::summarize()%>%as.data.frame() ##,Tutor.Type==tutor.type
     # 
     
@@ -129,7 +139,7 @@ outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term=
     names(our_info) <- c("module","evid","table1","table2","table3","table4","decision21",
                          "decision","decision3","decision4", "decision5","decision7","decision8",
                          "summary_stat","summary_decision1","summary_decision2","summary_decision4")
-
+    
     group<-function(x){
       if(x==0){
         res<-"Group1"
@@ -264,44 +274,56 @@ outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term=
       }, error = function(e) return(NULL), warning = function(w) return(NULL))
       print(length(Modules)-i+1)
     }
-save(our_info, file = "write_info.RData")
-    })   
+    
+    #Remove all the NA's and replace them with an open string
+    for(i in 1:nrow(our_info)){
+      for(j in 1:ncol(our_info)){
+        if(is.na(our_info[i,j])){
+          our_info[i,j]  = ""
+        }
+      }
+    }
+    
+    save(our_info, file = "write_info.RData")
+  })   
   
-output$downloadReport <- downloadHandler(
-  
-#############
-filename = function() {
-  paste('report', sep = '.', switch(
-    input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
-  ))
-},
-content = function(file) {
-  #Copy the report file to a temporary directory before processing it, in
-  #case we don't have write permissions to the current working dir (which
-  #can happen when deployed).
-  tempfolder <- file.path(tempdir())
-  pictures   <- list.files("images/",pattern = ".pdf", recursive = TRUE)
-  for(i in 1:length(pictures)) file.copy(paste("images/",pictures[i],sep=""),tempfolder, overwrite = TRUE)
-  #move all the pictures recursively
-  file.copy("write_info.RData",tempfolder, overwrite = TRUE)
-  file.copy("report.Rmd", tempfolder, overwrite = TRUE)
-  src <- normalizePath('report.Rmd')
-  # temporarily switch to the temp dir, in case you do not have write
-  # permission to the current working directory
-  owd <- setwd(tempdir())
-  on.exit(setwd(owd))
-  #on.exit(unlink(paste0(normalizePath(tempdir()), "/", dir(tempdir())), recursive = TRUE))
- 
-  library(rmarkdown)
-  out <- rmarkdown::render(paste(tempfolder,"/report.Rmd",sep=""), switch(
-    input$format,
-    PDF = pdf_document(), HTML = html_document(), Word = word_document()
-  ) )
-  #params = params,
-  file.rename(out, file)
-}
-##########
-
+  output$downloadReport <- downloadHandler(
+    
+    #############
+    filename = function() {
+      paste('report', sep = '.', switch(
+        input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
+      ))
+    },
+    content = function(file) {
+      #Copy the report file to a temporary directory before processing it, in
+      #case we don't have write permissions to the current working dir (which
+      #can happen when deployed).
+      tempfolder <- file.path(tempdir())
+      pictures   <- list.files("images/",pattern = ".pdf", recursive = TRUE)
+      for(i in 1:length(pictures)) file.copy(paste("images/",pictures[i],sep=""),tempfolder, overwrite = TRUE)
+      #remove them from your image folder
+      file.remove(paste("images/", list.files("images/"),sep=""))
+      #move all the pictures recursively
+      file.copy("write_info.RData",tempfolder, overwrite = TRUE)
+      file.copy("report.Rmd", tempfolder, overwrite = TRUE)
+      src <- normalizePath('report.Rmd')
+      # temporarily switch to the temp dir, in case you do not have write
+      # permission to the current working directory
+      owd <- setwd(tempdir())
+      on.exit(setwd(owd))
+      #on.exit(unlink(paste0(normalizePath(tempdir()), "/", dir(tempdir())), recursive = TRUE))
+      
+      library(rmarkdown)
+      out <- rmarkdown::render(paste(tempfolder,"/report.Rmd",sep=""), switch(
+        input$format,
+        PDF = pdf_document(), HTML = html_document(), Word = word_document()
+      ) )
+      #params = params,
+      file.rename(out, file)
+    }
+    ##########
+    
   )
 }
 

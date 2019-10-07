@@ -8,6 +8,9 @@ date: '`r format(Sys.time(), "%d %B, %Y")`'
 author: 'CTL ASIS user'
 ---
 
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
