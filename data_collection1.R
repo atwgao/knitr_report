@@ -1,5 +1,4 @@
 #data collection page
-library(tidyverse)
 data_collection_ui1 <- function(){
   fluidPage(
     #Download Data########################################################
@@ -43,24 +42,11 @@ data_collection_ui1 <- function(){
         #                          All = "all"),
         #              selected = "head"),
         helpText(),
-        tags$head(tags$script(src = "message-handler.js")),
         actionButton("next_button",label = HTML("<span class='small'>Next <i class='glyphicon glyphicon-arrow-right'></i></span>"))
         
       ),
       mainPanel(
-        DT::dataTableOutput("contents", width = "auto")
-        #tableOutput("contents")
-        # fluidRow(
-        #   
-        #   column(8,
-        #          tableOutput("contents")       
-        #   ),
-        #   
-        #   column(4,
-        #          plotOutput('regPlot')
-        #   )
-        # )
-        
+        DT::dataTableOutput("contents", width = "auto")       
       )
     )
   )

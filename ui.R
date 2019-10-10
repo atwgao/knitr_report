@@ -1,6 +1,13 @@
-rm(list = ls())
 library(shiny)
-library("stringr")
+library(dplyr)
+library(DT)
+library(stringr)
+library(rmarkdown)
+library(ppcor)
+library(shinyjs)
+################W
+library(plotly)
+
 source("data_collection1.R")
 source("data_collection2.R")
 source("report_ui.R")

@@ -1,7 +1,7 @@
-library(shiny)
 aggregate_modules <- data.frame()
 report_ui <- function(){
   fluidPage(
+    useShinyjs(), 
     title = 'Selectize examples',
     sidebarLayout(
       sidebarPanel(
@@ -23,16 +23,26 @@ report_ui <- function(){
                                 "PAS"="PAS"), 
                     selected = "NOR"),
          selectizeInput("modular", "Modules",
-                        aggregate_modules,multiple = T)
+                        aggregate_modules,multiple = T),
+        br(),
+        tags$head(tags$script(src = "message-handler.js")),
+        actionButton("generate","Compile report",icon= icon("running")),
+        tags$hr(style="border-color: darkred;"),
+        # disable(
+        uiOutput("downloadReport"),
+        #downloadButton("downloadReport", "Download report"),
+        # ),
+      br(),
+      # disable(
+        radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
+                     inline = TRUE)
       ),
       mainPanel(
-      helpText('If the above searching fails, it is probably the Github API limit
-               has been reached (5 per minute). You can try later.'),
-      verbatimTextOutput('github'),
-      actionButton("generate","Generate report",icon= icon("running")),
-      downloadButton("downloadReport", "Generate report"),
-      radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
-                   inline = TRUE)
+      # helpText('If the above fails, it is probably the API limit
+      #          reached (5 per minute). Refresh the page, or rerun the docker instance.'),
+        uiOutput("scatter"),
+        verbatimTextOutput("event"),
+        tags$hr(style="border-color: gray;")
       )
         )
         )

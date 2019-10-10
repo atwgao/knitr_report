@@ -3,7 +3,6 @@ mark <- read.csv("~/performance.csv")
 #*********************************************load Attendence data
 att <-read.csv("~/attendance.csv")
 
-library(tidyverse)
 FindMod <- function(x){
   a1<-att$Module.Code[!duplicated(att$Module.Code)][grepl(x,att$Module.Code[!duplicated(att$Module.Code)])]
   a2<-mark$Module.Code[!duplicated(mark$Module.Code)][grepl(x,mark$Module.Code[!duplicated(mark$Module.Code)])]

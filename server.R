@@ -2,33 +2,113 @@
 ui = (htmlOutput("page"))
 options(shiny.maxRequestSize = 30*1024^4)
 function(input, output, session) {
+  
   observe({
     if(file.exists("complete_data.RData")){
       e <<- 3
       output$page <- renderUI({
-        div(class="outer",do.call(fluidPage,c(inverse=TRUE,title = paste("You're logged in as", isolate(input$userName)),report_ui())))
+       div(class="outer",do.call(fluidPage,c(inverse=TRUE,title = paste("You're logged in as", isolate(input$userName)),report_ui())))
       })
       print(ui)
     }else{
+      e <<- 
       data_being_collected <<- "attendance"
       if(data_being_collected == "attendance"){
         output$page <- renderUI({
-          div(class="outer",do.call(fluidPage,c(inverse=TRUE,title = paste("You're logged in as", isolate(input$userName)),data_collection_ui1())))
+          div(class="outer",do.call(fluidPage,c(inverse=TRUE ,data_collection_ui1())))
         })
         print(ui)
       }
       else{
         output$page <- renderUI({
-          div(class="outer",do.call(fluidPage,c(inverse=TRUE,title = paste("You're logged in as", isolate(input$userName)),data_collection_ui2())))
+          div(class="outer",do.call(fluidPage,c(inverse=TRUE,data_collection_ui2())))
         })
         print(ui)
       }
     }
     
-    
   })
   
   
+  FreqData <- reactive({
+    if(file.exists("complete_data.RData")) load("complete_data.RData")
+    campus       <- (input$campus)
+    faculty      <- (input$faculty)
+    semester     <- (input$semester)
+    tutor.type   <- (input$tutor.type)
+    .Modules     <- (input$modular)
+    names(GroupedData)[names(GroupedData)=="GR_12_ADSCORE"]<-"AP"
+    Freq3<-GroupedData%>%filter(Campus==campus,FACULTY==faculty,Term==semester, Tutor.Type==tutor.type)%>%group_by(Attendee,Module.Code,FINAL.MARK,AP,freq)%>%dplyr::summarize()%>%as.data.frame() ##,Tutor.Type==tutor.type
+    #Freq3
+  })   
+
+  
+observeEvent(input$faculty,{
+ 
+
+  output$scatter <- renderUI({
+    
+    output$plot1 <-  renderPlotly({
+      print("something is happening")
+         
+      f <- list(
+        family = "Courier New, monospace",
+        size = 18,
+        color = "#7f7f7f"
+      )
+      f2 <- list(
+        family = "Old Standard TT, serif",
+        size = 18,
+        color = "black"
+      )
+      x <- list(
+        title = "AVG",
+        titlefont = f,
+        tickfont = f2
+      )
+      y <- list(
+        title = "TUTORIALS ATTENDED",
+        titlefont = f,
+        tickfont = f2
+      )
+      
+ #     print(
+        p <- FreqData()%>%group_by(Module.Code, gr=cut(freq, breaks= c(0,1,5,20), right=F))%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+        plot_ly(
+          x = ~mean,
+          y = ~gr,
+          size = ~n,
+          sizes = c(100,500),
+          color = ~gr,
+          frame = ~Module.Code,
+          text = ~Module.Code,
+          hovertemplate = paste(
+            "<b>Performance per Module</b><br><br>",
+            "Tutorial Attendance: %{y}<br>",
+            "Mark Average: %{x:,.02f}%<br>",
+            "Scaled student population: %{marker.size:,.0f}",
+            "<extra></extra>"
+          ),
+          # hoverinfo = "text",
+          type = 'scatter',
+          mode = 'markers', alpha = 0.5)%>% layout(xaxis = x, yaxis = y)
+     # )
+      ggplotly(p)
+      
+    })
+    
+      
+  plotlyOutput("plot1")
+
+  })
+     
+  output$event <- renderPrint({
+    d <- event_data("plotly_hover")
+    if (is.null(d)) "Hover on a point!" else d
+  })
+
+})
+
   filedata <- reactive({
     req(input$file1)
     # when reading semicolon separated files,
@@ -57,6 +137,7 @@ function(input, output, session) {
   
   observe(e <<- 0)
   observeEvent(input$next_button, {
+    showModal(modalDialog("Please be petient, ASIS is processing your data ...", footer=NULL))
     dat_temp <- filedata()
     data_being_collected <<- "performance";
     output$page <- renderUI({
@@ -79,15 +160,23 @@ function(input, output, session) {
       })
       print(ui)
     }
+    removeModal()
   })
   
   
   outVar <- reactive({#%>%filter(Campus==input$campus,FACULTY==input$faculty,Term==input$semester)
     if(file.exists("complete_data.RData")) load("complete_data.RData")
     req(input$campus,input$faculty,input$semester)
-    x <- GroupedData%>%filter(Campus==input$campus,FACULTY==input$faculty,Term==input$semester)%>%distinct(Module.Code)
-    mydata = c("Select All",x)
+    x <- GroupedData%>%filter(Campus==input$campus,FACULTY==input$faculty,Term==input$semester)%>%distinct(Module.Code)%>%.$Module.Code
+    print(x)
+    if(length(x) == 0){
+      mydata = NULL
+    }else{
+      mydata = c("Select All",x)
+    }
+
   })
+  
   
   observe({
     updateSelectInput(session, "modular",
@@ -102,7 +191,26 @@ function(input, output, session) {
     }
   })
   
+
+  observe({
+    shinyjs::disable("downloadReport")
+  })
+  
   observeEvent(input$generate, {
+    session$sendCustomMessage(type = 'testmessage',
+                              message = 'Done !!.. Your report is ready for download')
+    shinyjs::enable("downloadReport")
+  })
+  
+  observeEvent(input$next_button, {
+    session$sendCustomMessage(type = 'testmessage',
+                              message = 'Done !!.. Your report is ready for download')
+  })
+ 
+
+  observeEvent(input$generate, {
+
+    showModal(modalDialog("Compiling...", footer=NULL))
     if(file.exists("complete_data.RData")) load("complete_data.RData")
     campus       <- isolate(input$campus)
     faculty      <- isolate(input$faculty)
@@ -111,7 +219,7 @@ function(input, output, session) {
     .Modules     <- isolate(input$modular)
     names(GroupedData)[names(GroupedData)=="GR_12_ADSCORE"]<-"AP"
     Freq3<-GroupedData%>%filter(Campus==campus,FACULTY==faculty,Term==semester, Tutor.Type==tutor.type)%>%group_by(Attendee,Module.Code,FINAL.MARK,AP,freq)%>%dplyr::summarize()%>%as.data.frame() ##,Tutor.Type==tutor.type
-    
+
     # chk_mod <- Freq3 %>% group_by(Module.Code) %>% add_count(Module.Code)
     # chk_mod <- chk_mod %>% group_by(Module.Code,freq,n) %>%dplyr::summarise(zero_attendance=n())
     # #Of those students extract only the one who attended zero tutorials and 
@@ -130,7 +238,7 @@ function(input, output, session) {
     
     #from the t-test I need 4 results, 4 from anova and 4 from corr for every module
     if(.Modules=="Select All"){Modules<-NOR_check%>%filter(Tutor.Type=="NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
-    }else{Modules<-unlist(strsplit(.Module,","))}
+    }else{Modules<-unlist(strsplit(.Modules,","))}
     # AnMods<-vector()
     # summary_table <- array(NA,dim=c(length(Modules),4))
     
@@ -285,10 +393,15 @@ function(input, output, session) {
     }
     
     save(our_info, file = "write_info.RData")
+    removeModal()
   })   
   
-  output$downloadReport <- downloadHandler(
-    
+  output$downloadReport <- renderUI({
+    req(input$generate)
+    downloadButton("downloadData01","Download Report")
+  })
+  
+  output$downloadData01 <- downloadHandler(
     #############
     filename = function() {
       paste('report', sep = '.', switch(
