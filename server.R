@@ -49,7 +49,7 @@ observeEvent(input$faculty,{
   output$scatter <- renderUI({
     
     output$plot1 <-  renderPlotly({
-      print("something is happening")
+
          
       f <- list(
         family = "Courier New, monospace",
@@ -73,7 +73,8 @@ observeEvent(input$faculty,{
       )
       
  #     print(
-        p <- FreqData()%>%group_by(Module.Code, gr=cut(freq, breaks= c(0,1,5,20), right=F))%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+        df <- FreqData()%>%group_by(Module.Code, gr=cut(freq, breaks= c(0,1,5,20), right=F))%>%summarise(n = n(),mean=mean(FINAL.MARK))
+        p <- df %>%
         plot_ly(
           x = ~mean,
           y = ~gr,
@@ -97,11 +98,22 @@ observeEvent(input$faculty,{
       
     })
     
-      
-  plotlyOutput("plot1")
 
+  plotlyOutput("plot1")
   })
-     
+  
+  output$plt2 <- renderPlot({
+    FreqData()%>%group_by(Module.Code,freq, FINAL.MARK)%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+    ggplot(.,aes(freq,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
+      stat_smooth()+xlab("Tutorial Attendance")  
+  })
+  
+  output$plt3 <- renderPlot({
+    FreqData()%>%group_by(Module.Code,freq, FINAL.MARK,AP)%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+      ggplot(.,aes(AP,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
+      stat_smooth()+xlab("AP Score")
+  })
+  
   output$event <- renderPrint({
     d <- event_data("plotly_hover")
     if (is.null(d)) "Hover on a point!" else d
@@ -109,7 +121,7 @@ observeEvent(input$faculty,{
 
 })
 
-  filedata <- reactive({
+filedata <- reactive({
     req(input$file1)
     # when reading semicolon separated files,
     # having a comma separator causes `read.csv` to error

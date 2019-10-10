@@ -7,6 +7,9 @@ library(ppcor)
 library(shinyjs)
 ################W
 library(plotly)
+library(viridisLite)
+library(kableExtra)
+library(gridExtra)
 
 source("data_collection1.R")
 source("data_collection2.R")

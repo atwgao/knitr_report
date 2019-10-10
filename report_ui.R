@@ -42,7 +42,14 @@ report_ui <- function(){
       #          reached (5 per minute). Refresh the page, or rerun the docker instance.'),
         uiOutput("scatter"),
         verbatimTextOutput("event"),
-        tags$hr(style="border-color: gray;")
+        tags$hr(style="border-color: gray;"),
+        column(6,
+               plotOutput("plt2") 
+               ),
+        column(6,
+               plotOutput("plt3") 
+        )
+
       )
         )
         )
