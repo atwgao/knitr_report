@@ -103,15 +103,27 @@ observeEvent(input$faculty,{
   })
   
   output$plt2 <- renderPlot({
-    FreqData()%>%group_by(Module.Code,freq, FINAL.MARK)%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+    req(input$modular)
+    if(input$modular != "Select All"){
+      df = FreqData()%>%filter(Module.Code == input$modular) %>% group_by(freq, FINAL.MARK,AP)
+    }else{
+      df = FreqData() %>% group_by(Module.Code, freq, FINAL.MARK,AP)
+    }
+    df %>% group_by(freq, FINAL.MARK,AP)%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
     ggplot(.,aes(freq,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
-      stat_smooth()+xlab("Tutorial Attendance")  
+      stat_smooth()+xlab("Tutorial Attendance")   + ylim(0, 100)
   })
   
   output$plt3 <- renderPlot({
-    FreqData()%>%group_by(Module.Code,freq, FINAL.MARK,AP)%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+    req(input$modular)
+    if(input$modular != "Select All"){
+      df = FreqData()%>%filter(Module.Code == input$modular) %>% group_by(freq, FINAL.MARK,AP)
+    }else{
+      df = FreqData() %>% group_by(Module.Code, freq, FINAL.MARK,AP)
+    }
+    df %>%group_by(freq, FINAL.MARK,AP)%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
       ggplot(.,aes(AP,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
-      stat_smooth()+xlab("AP Score")
+      stat_smooth()+xlab("AP Score")+ ylim(0, 100)
   })
   
   output$event <- renderPrint({
@@ -249,8 +261,8 @@ filedata <- reactive({
     source("post_hoc.R")
     
     #from the t-test I need 4 results, 4 from anova and 4 from corr for every module
-    if(.Modules=="Select All"){Modules<-NOR_check%>%filter(Tutor.Type=="NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
-    }else{Modules<-unlist(strsplit(.Modules,","))}
+    if(.Modules=="Select All"){Modules<<-NOR_check%>%filter(Tutor.Type=="NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
+    }else{Modules<<-unlist(strsplit(.Modules,","))}
     # AnMods<-vector()
     # summary_table <- array(NA,dim=c(length(Modules),4))
     
