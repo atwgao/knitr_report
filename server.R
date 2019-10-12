@@ -11,13 +11,16 @@ function(input, output, session) {
       })
       print(ui)
     }else{
-      e <<- 
+      e <<- 0
       data_being_collected <<- "attendance"
       if(data_being_collected == "attendance"){
         output$page <- renderUI({
           div(class="outer",do.call(fluidPage,c(inverse=TRUE ,data_collection_ui1())))
         })
         print(ui)
+        
+        output$mods <- renderText({"This is some red text"})
+        
       }
       else{
         output$page <- renderUI({
@@ -102,16 +105,31 @@ observeEvent(input$faculty,{
   plotlyOutput("plot1")
   })
   
+  
+  
   output$plt2 <- renderPlot({
-    FreqData()%>%group_by(Module.Code,freq, FINAL.MARK)%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+    req(input$modular)
+    if(input$modular == "Select All"){
+      df = FreqData()%>%group_by(Module.Code,freq, FINAL.MARK,AP)
+    }else{
+      df = FreqData()%>%filter(Module.Code%in%input$modular)%>%group_by(Module.Code,freq, FINAL.MARK,AP)
+    }
+    df%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
     ggplot(.,aes(freq,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
-      stat_smooth()+xlab("Tutorial Attendance")  
+      stat_smooth()+xlab("Tutorial Attendance")  + ylab("Average Final Marks")
   })
   
   output$plt3 <- renderPlot({
-    FreqData()%>%group_by(Module.Code,freq, FINAL.MARK,AP)%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+    req(input$modular)
+    if(input$modular == "Select All"){
+      df = FreqData()%>%group_by(Module.Code,freq, FINAL.MARK,AP)
+    }else{
+      df = FreqData()%>%filter(Module.Code%in%input$modular)%>%group_by(Module.Code,freq, FINAL.MARK,AP)
+    }
+    df%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
       ggplot(.,aes(AP,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
-      stat_smooth()+xlab("AP Score")
+      stat_smooth()+xlab("AP Score")+ylab("Average Final Marks")#+
+     # theme(axis.title.y = element_text(family = "Old Standard TT, serif"), axis.title.x = element_text(family = "Old Standard TT, serif"))
   })
   
   output$event <- renderPrint({
@@ -160,6 +178,8 @@ filedata <- reactive({
     
     if(e ==  1){
       write.csv(dat_temp, file = "~/attendance.csv")
+     # temp_mods <- dat_temp$Module.Code I was working here
+      output$mods <- renderText({"This is some red text"})
     }
     if(e == 2){
       write.csv(dat_temp, file = "~/performance.csv")

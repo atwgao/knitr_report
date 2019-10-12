@@ -46,7 +46,10 @@ data_collection_ui1 <- function(){
         
       ),
       mainPanel(
-        DT::dataTableOutput("contents", width = "auto")       
+        DT::dataTableOutput("contents", width = "auto") ,
+        tags$hr(style="border-color: gray;"),
+        span(textOutput("mods"), style="font-weight: bold; font-family:Courier New; font-size: 20px; color: steelblue; font-style: italic")
+
       )
     )
   )
