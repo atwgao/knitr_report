@@ -5,11 +5,10 @@ library(stringr)
 library(rmarkdown)
 library(ppcor)
 library(shinyjs)
+library(shinyalert)
 ################W
 library(plotly)
-library(viridisLite)
-library(kableExtra)
-library(gridExtra)
+library(Hmisc)
 
 source("data_collection1.R")
 source("data_collection2.R")

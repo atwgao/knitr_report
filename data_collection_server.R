@@ -1,5 +1,7 @@
 #Data collection portion
-function(input, output) {
+function(input, output,session) {
+  
+  output$mods <- renderText({"This is some red text"})
   
   filedata <- reactive({
     req(input$file1)

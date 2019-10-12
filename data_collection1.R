@@ -42,13 +42,15 @@ data_collection_ui1 <- function(){
         #                          All = "all"),
         #              selected = "head"),
         helpText(),
+        useShinyalert(),
         actionButton("next_button",label = HTML("<span class='small'>Next <i class='glyphicon glyphicon-arrow-right'></i></span>"))
         
       ),
       mainPanel(
         DT::dataTableOutput("contents", width = "auto") ,
         tags$hr(style="border-color: gray;"),
-        span(textOutput("mods"), style="font-weight: bold; font-family:Courier New; font-size: 20px; color: steelblue; font-style: italic")
+        span(htmlOutput("mods2"), style="font-weight: bold; font-family:Courier New; font-size: 12px; color: black"),
+        span(htmlOutput("mods"), style="font-family:Courier New; font-size: 9px; color: gray")
 
       )
     )

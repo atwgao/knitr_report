@@ -19,7 +19,29 @@ function(input, output, session) {
         })
         print(ui)
         
-        output$mods <- renderText({"This is some red text"})
+        ####################################################
+        observeEvent(input$file1,{
+          dat_temp %>% mutate_if(is.factor, as.character) -> dat_temp
+          att_temp = dat_temp%>%group_by(Tutor.Type,Acad.Group)%>%distinct(Module.Code)%>%arrange(.by_group = T)
+          
+          ems_mods = att_temp%>%filter(Acad.Group == "MEMS",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
+          hum_mods = att_temp%>%filter(Acad.Group == "MHUM",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
+          hsc_mods = att_temp%>%filter(Acad.Group == "MHSC",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
+          law_mods = att_temp%>%filter(Acad.Group == "MLAW",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
+          edu_mods = att_temp%>%filter(Acad.Group == "MEDU",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
+          nas_mods = att_temp%>%filter(Acad.Group == "MNAS",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
+          output$mods2 <- renderText({"Copy and send the following modules to DIRAP when requesting for performance data (All campuses)"})
+          output$mods <- renderText({
+            paste0("EMS Modules: ", toString(ems_mods),br(),br(),
+            "HUM Modules: ", toString(hum_mods),br(),br(),
+            "HSC Modules: ", toString(hsc_mods),br(),br(),
+            "LAW Modules: ", toString(law_mods),br(),br(),
+            "EDU Modules: ", toString(edu_mods),br(),br(),
+            "NAS Modules: ", toString(nas_mods))
+          })
+          
+        })
+        ####################################################
         
       }
       else{
@@ -109,6 +131,7 @@ observeEvent(input$faculty,{
   
   output$plt2 <- renderPlot({
     req(input$modular)
+
     if(input$modular == "Select All"){
       df = FreqData()%>%group_by(Module.Code,freq, FINAL.MARK,AP)
     }else{
@@ -116,7 +139,8 @@ observeEvent(input$faculty,{
     }
     df%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
     ggplot(.,aes(freq,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
-      stat_smooth()+xlab("Tutorial Attendance")  + ylab("Average Final Marks")
+      stat_smooth()+xlab("Tutorial Attendance")  + ylab("Average Final Marks")  + ylim(0, 100)
+
   })
   
   output$plt3 <- renderPlot({
@@ -128,8 +152,7 @@ observeEvent(input$faculty,{
     }
     df%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
       ggplot(.,aes(AP,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
-      stat_smooth()+xlab("AP Score")+ylab("Average Final Marks")#+
-     # theme(axis.title.y = element_text(family = "Old Standard TT, serif"), axis.title.x = element_text(family = "Old Standard TT, serif"))
+      stat_smooth()+xlab("AP Score")+ylab("Average Final Marks")+ ylim(0, 100)
   })
   
   output$event <- renderPrint({
@@ -178,12 +201,12 @@ filedata <- reactive({
     
     if(e ==  1){
       write.csv(dat_temp, file = "~/attendance.csv")
-     # temp_mods <- dat_temp$Module.Code I was working here
-      output$mods <- renderText({"This is some red text"})
+      shinyalert("Awesome!", "Attendance data loaded succesfully, Now please load the performance data containing student marks", type = "success")
     }
     if(e == 2){
       write.csv(dat_temp, file = "~/performance.csv")
       source("data_compile.R")
+      shinyalert("Done !", "Done merging and aggregating your data, now you can generate your report", type = "success")
     }
     
     if(e >= 2){
@@ -269,8 +292,8 @@ filedata <- reactive({
     source("post_hoc.R")
     
     #from the t-test I need 4 results, 4 from anova and 4 from corr for every module
-    if(.Modules=="Select All"){Modules<-NOR_check%>%filter(Tutor.Type=="NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
-    }else{Modules<-unlist(strsplit(.Modules,","))}
+    if(.Modules=="Select All"){Modules<<-NOR_check%>%filter(Tutor.Type=="NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
+    }else{Modules<<-unlist(strsplit(.Modules,","))}
     # AnMods<-vector()
     # summary_table <- array(NA,dim=c(length(Modules),4))
     

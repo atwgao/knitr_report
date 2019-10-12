@@ -37,7 +37,6 @@ data_collection_ui2 <- function(){
         tags$hr(),
          
         helpText(),
-        tags$head(tags$script(src = "message-handler.js")),
         actionButton("next_button",label = HTML("<span class='small'>Done <i class='glyphicon glyphicon-ok'></i></span>"))
 
       ),
