@@ -18,11 +18,15 @@ function(input, output, session) {
           div(class="outer",do.call(fluidPage,c(inverse=TRUE ,data_collection_ui1())))
         })
         print(ui)
-        
         ####################################################
         observeEvent(input$file1,{
-          dat_temp %>% mutate_if(is.factor, as.character) -> dat_temp
-          att_temp = dat_temp%>%group_by(Tutor.Type,Acad.Group)%>%distinct(Module.Code)%>%arrange(.by_group = T)
+          if(data_being_collected == "attendance"){
+            att_temp <<- filedata()
+          }else{
+            att_temp <- att_temp
+          }
+          att_temp %>% mutate_if(is.factor, as.character) -> att_temp
+          att_temp = att_temp%>%group_by(Tutor.Type,Acad.Group)%>%distinct(Module.Code)%>%dplyr::arrange(.by_group = T)
           
           ems_mods = att_temp%>%filter(Acad.Group == "MEMS",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
           hum_mods = att_temp%>%filter(Acad.Group == "MHUM",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
@@ -67,6 +71,27 @@ function(input, output, session) {
     #Freq3
   })   
 
+  f <- list(
+    family = "Courier New, monospace",
+    size = 18,
+    color = "#7f7f7f"
+  )
+  f2 <- list(
+    family = "Old Standard TT, serif",
+    size = 18,
+    color = "black"
+  )
+  x <- list(
+    title = "AVG",
+    titlefont = f,
+    tickfont = f2
+  )
+  y <- list(
+    title = "TUTORIALS ATTENDED",
+    titlefont = f,
+    tickfont = f2
+  )
+  
   
 observeEvent(input$faculty,{
  
@@ -76,26 +101,7 @@ observeEvent(input$faculty,{
     output$plot1 <-  renderPlotly({
 
          
-      f <- list(
-        family = "Courier New, monospace",
-        size = 18,
-        color = "#7f7f7f"
-      )
-      f2 <- list(
-        family = "Old Standard TT, serif",
-        size = 18,
-        color = "black"
-      )
-      x <- list(
-        title = "AVG",
-        titlefont = f,
-        tickfont = f2
-      )
-      y <- list(
-        title = "TUTORIALS ATTENDED",
-        titlefont = f,
-        tickfont = f2
-      )
+
       
  #     print(
         df <- FreqData()%>%group_by(Module.Code, gr=cut(freq, breaks= c(0,1,5,20), right=F))%>%summarise(n = n(),mean=mean(FINAL.MARK))
@@ -134,25 +140,30 @@ observeEvent(input$faculty,{
 
     if(input$modular == "Select All"){
       df = FreqData()%>%group_by(Module.Code,freq, FINAL.MARK,AP)
+      df$AP = as.numeric(as.character(df$AP))/100
     }else{
       df = FreqData()%>%filter(Module.Code%in%input$modular)%>%group_by(Module.Code,freq, FINAL.MARK,AP)
     }
-    df%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+    p2 <- df%>%
     ggplot(.,aes(freq,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
       stat_smooth()+xlab("Tutorial Attendance")  + ylab("Average Final Marks")  + ylim(0, 100)
-
+    p2 #) %>% layout(xaxis = y, yaxis = x)
   })
   
   output$plt3 <- renderPlot({
     req(input$modular)
     if(input$modular == "Select All"){
       df = FreqData()%>%group_by(Module.Code,freq, FINAL.MARK,AP)
+      print(class(df))
     }else{
       df = FreqData()%>%filter(Module.Code%in%input$modular)%>%group_by(Module.Code,freq, FINAL.MARK,AP)
     }
-    df%>%summarise(n = n(),mean=mean(FINAL.MARK))%>%
+    df$AP = as.numeric(as.character(df$AP))
+    df2 <<- df
+   p3 <- df%>%
       ggplot(.,aes(AP,FINAL.MARK))+stat_summary(fun.data=mean_cl_normal) + 
       stat_smooth()+xlab("AP Score")+ylab("Average Final Marks")+ ylim(0, 100)
+    p3#) %>% layout(xaxis = y, yaxis = x)
   })
   
   output$event <- renderPrint({
@@ -200,6 +211,7 @@ filedata <- reactive({
     e <<- e + 1
     
     if(e ==  1){
+      
       write.csv(dat_temp, file = "~/attendance.csv")
       shinyalert("Awesome!", "Attendance data loaded succesfully, Now please load the performance data containing student marks", type = "success")
     }
@@ -313,47 +325,42 @@ filedata <- reactive({
       return(res)
     }
     
-    i <- 0
-    while(i <= length(Modules)){
-      if(i==0){
-        if(all(.Modules=="Select All")){
-          Module <<-"Faculty"
-          Freq <- Freq3
-          Freq$Groupvec <- sapply(Freq$freq,group)
-          i <- 1
-          our_info[i,]$module <- Module
-          our_info[i,]$summary_stat <- summary_stat(Freq)
-          iii <- corr(Freq)
-          our_info[i,]$table3 <- iii$table3
-          our_info[i,]$table4 <- iii$table4
-          our_info[i,]$summary_decision4 <- iii$summary_decision4
-          our_info[i,]$decision7 <- iii$decision7
-          our_info[i,]$decision8 <- iii$decision8
-          
-          ttt <- ttest(Freq)
-          our_info[i,]$table1           <- ttt$table1
-          our_info[i,]$decision         <- ttt$decision
-          our_info[i,]$summary_decision1<- ttt$summary_decision1
-          our_info[i,]$summary_decision2<- ttt$summary_decision2
-          
-          aaa <- anovatest(Freq)
-          our_info[i,]$table2    <- aaa$table2
-          our_info[i,]$decision3 <- aaa$decision3
-          our_info[i,]$decision4 <- aaa$decision4
-          our_info[i,]$decision5 <- aaa$decision5
-          
-          tryCatch({
-            pdf(file=paste("images/pic",i,".pdf",sep=""),width = 8,height=8,pointsize = 18)
-            print(funny(Freq))
-            dev.off()
-          }, error = function(e) return(NULL), warning = function(w) return(NULL))
-        }else{
-          i <- 1
-        }
-      }else{
-        i <- i+1
-      }
-      
+    #The first entry is the Faculty mods
+    #####################################################################################################
+    Module <<-"Faculty"
+    Freq <- Freq3
+    Freq$Groupvec <- sapply(Freq$freq,group)
+    our_info[1,]$module <- Module
+    our_info[1,]$summary_stat <- summary_stat(Freq)
+    iii <- corr(Freq)
+    our_info[1,]$table3 <- iii$table3
+    our_info[1,]$table4 <- iii$table4
+    our_info[1,]$summary_decision4 <- iii$summary_decision4
+    our_info[1,]$decision7 <- iii$decision7
+    our_info[1,]$decision8 <- iii$decision8
+    
+    ttt <- ttest(Freq)
+    our_info[1,]$table1           <- ttt$table1
+    our_info[1,]$decision         <- ttt$decision
+    our_info[1,]$summary_decision1<- ttt$summary_decision1
+    our_info[1,]$summary_decision2<- ttt$summary_decision2
+    
+    aaa <- anovatest(Freq)
+    our_info[1,]$table2    <- aaa$table2
+    our_info[1,]$decision3 <- aaa$decision3
+    our_info[1,]$decision4 <- aaa$decision4
+    our_info[1,]$decision5 <- aaa$decision5
+    
+    tryCatch({
+      pdf(file=paste("images/pic",1,".pdf",sep=""),width = 8,height=8,pointsize = 18)
+      print(funny(Freq))
+      dev.off()
+    }, error = function(e) return(NULL), warning = function(w) return(NULL))
+    #####################################################################################################
+    
+    
+ 
+    for(i in 2:length(Modules)){
       our_info[i,]$module <- Module <<- Modules[i]
       Freq<-na.omit(Freq3[Freq3$Module.Code==Modules[i],])
       Freq$Groupvec<-sapply(Freq$freq,group)
@@ -472,6 +479,7 @@ filedata <- reactive({
       for(i in 1:length(pictures)) file.copy(paste("images/",pictures[i],sep=""),tempfolder, overwrite = TRUE)
       #remove them from your image folder
       file.remove(paste("images/", list.files("images/"),sep=""))
+      dir.create("images")
       #move all the pictures recursively
       file.copy("write_info.RData",tempfolder, overwrite = TRUE)
       file.copy("report.Rmd", tempfolder, overwrite = TRUE)
