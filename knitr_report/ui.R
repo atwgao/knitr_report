@@ -9,6 +9,7 @@ library(shinyalert)
 ################W
 library(plotly)
 library(Hmisc)
+library(kableExtra)
 
 source("data_collection1.R")
 source("data_collection2.R")
