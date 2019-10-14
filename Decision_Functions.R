@@ -151,7 +151,7 @@ corr<-function(Freq){
   if(ptest$p.value<0.05){
     table3            <- "Yes*"
     decision7         <-paste("There was a statistically significant,",adj(ptest$estimate),"positive linear relationship (at a 5% significance level) between attendance of tutorial sessions and the final mark obtained by the students (r =",paste(round(ptest$estimate,4),";",sep=""),"p =",Gformat(ptest$p.value),"<0.05).")
-    summary_decision3 <-paste("Increased attendance of tutorial sessions is associated with an increase in final marks,")
+    summary_decision3 <-paste("Increased attendance of tutorial sessions is associated with an increase in final marks, ")
   }else {
     table3            <- "No*"
     decision7         <-paste("There was a statistically non-significant,",adj(ptest$estimate),"positive linear relationship (at a 5% significance level) between attendance of tutorial sessions and the final mark obtained by the students (r =",paste(round(ptest$estimate,4),";",sep=""),"p =",Gformat(ptest$p.value),">0.05).")
@@ -180,7 +180,7 @@ corr<-function(Freq){
     summary_decision4 <- ""
     decision8         <- paste(" When controlling for previous academic performance (AP Score), the correlation",state(pptest$estimate),adj2(ptest$estimate,pptest$estimate),adj(pptest$estimate),"positive and remained insignificant (r =",paste(round(pptest$estimate,4),";",sep=""),"p =",Gformat(pptest$p.value),">0.05).")
   }
-  return(list(table3=table3,table4=table4,summary_decision4=summary_decision4,decision7=decision7,decision8=decision8))
+  return(list(table3=table3,table4=table4,summary_decision3=summary_decision3,summary_decision4=summary_decision4,decision7=decision7,decision8=decision8))
 }
 
 summary_stat<-function(Freq){
@@ -199,42 +199,42 @@ if(nrow(Freq[Freq$freq==0,])!=0){
 funny<-function(Freq){
   dat<-c(round(mean(Freq[Freq$freq==0,]$FINAL.MARK),2),round(mean(Freq[Freq$freq<=4&Freq$freq>0,]$FINAL.MARK),2),round(mean(Freq[Freq$freq>4,]$FINAL.MARK),2))
   .size <- c(round(length(Freq[Freq$freq==0,]$FINAL.MARK),2),round(length(Freq[Freq$freq<=4&Freq$freq>0,]$FINAL.MARK),2),round(length(Freq[Freq$freq>4,]$FINAL.MARK),2))
-  par(mar = c(8,8,5,4))
-  par(mgp=c(6, 4, 1))
+  par(mar = c(9,9,2,4))
+  par(mgp=c(7, 4, 1))
   if(dat[1]=="NaN"&dat[2]!="NaN"&dat[3]!="NaN"){
     plot(dat[2:3],xlab="Tutorial Attendance",ylab="Final Marks (%)",main=paste("Means of students' final marks against tutorial attendence\nfor the module",Module),cex.lab=1.5,font.lab=2,ylim=c(10,110),axes = FALSE,type="l",lwd=16,col="lightgreen")
     axis(2);axis(side=1,at=c(1,2),labels=c("Students who\nattended 1-4\ntutorials","Students who\nattended 5\n or more tutorials"))
     lines(dat[2:3],lty=1,lwd=6,col="darkred")
     lines(dat[2:3],pch=17,lwd=3,col=terrain.colors(4),cex=c(3+3*.size[2:3]/sum(.size[2:3])),type="p")
     yy =as.vector(t(dat[2:3])); grid()
-    text(x=c(1.1,1.9), y=yy+15,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
+    text(x=c(1.2,1.8), y=yy+17,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
   }else if(dat[2]=="NaN"&dat[1]!="NaN"&dat[3]!="NaN"){
     plot(c(dat[1],dat[3]),xlab="Tutorial Attendance",ylab="Final Marks (%)",main=paste("Means of students' final marks against tutorial attendence\nfor the module",Module),cex.lab=1.5,font.lab=2,ylim=c(10,110),axes = FALSE,type="l",lwd=16,col="lightgreen")
     axis(2);axis(side=1,at=c(1,2),labels=c("Students who\nnever attended\ntutorials","Students who\nattended 5\n or more tutorials"))
     lines(c(dat[1],dat[3]),lty=1,lwd=6,col="darkred")
     lines(c(dat[1],dat[3]),pch=17,lwd=3,col=terrain.colors(4),cex=c(3+3*.size[c(1,3)]/sum(.size[c(1,3)])),type="p")
     yy =as.vector(t(c(dat[1],dat[3]))); grid()
-    text(x=c(1.1,1.9), y=yy+15,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
+    text(x=c(1.2,1.8), y=yy+17,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
   }else if(dat[3]=="NaN"&dat[1]!="NaN"&dat[2]!="NaN"){
     plot(dat[1:2],xlab="Tutorial Attendance",ylab="Final Marks (%)",main=paste("Means of students' final marks against tutorial attendence\nfor the module",Module),cex.lab=1.5,font.lab=2,ylim=c(10,110),axes = FALSE,type="l",lwd=16,col="lightgreen")
     axis(2);axis(side=1,at=c(1,2),labels=c("Students who\nnever attended\ntutorials","Students who\nattended 1-4\ntutorials"))
     lines(dat[1:2],lty=1,lwd=6,col="darkred")
     lines(dat[1:2],pch=17,lwd=3,col=terrain.colors(4),cex=c(3+3*.size[c(1,2)]/sum(.size[c(1,2)])),type="p")
     yy =as.vector(t(dat[1:2])); grid()
-    text(x=c(1.1,1.9), y=yy+15,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
+    text(x=c(1.1,1.8), y=yy+15,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
   }else if(dat[1]!="NaN"&dat[2]!="NaN"&dat[3]!="NaN"){
     plot(dat,xlab="Tutorial Attendance",ylab="Final Marks (%)",main=paste("Means of students' final marks against tutorial attendence\nfor the module",Module),cex.lab=1.5,font.lab=2,ylim=c(10,110),axes = FALSE,type="l",lwd=16,col="lightgreen")
     axis(2);axis(side=1,at=c(1,2,3),labels=c("Students who\nnever attended\ntutorials","Students who\nattended 1-4\ntutorials","Students who\nattended 5\n or more tutorials"))
     lines(dat,lty=1,lwd=6,col="darkred")
     lines(dat,pch=17,lwd=3,col=terrain.colors(4),cex=c(3+3*.size/sum(.size)),type="p")
     yy =as.vector(t(dat)); grid()
-    text(x=c(1.1,2,2.9), y=yy+15,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
+    text(x=c(1.15,2.1,2.8), y=yy+17,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
   }else{
     type<-c("Students who\nnever attended\ntutorials","Students who\nattended 1-4\ntutorials","Students who\nattended 5\n or more tutorials")
     plot(dat[dat!="NaN"],xlab="Tutorial Attendance",ylab="Final Marks (%)",main=paste("Means of students' final marks against tutorial attendence\nfor the module",Module),cex.lab=1.5,font.lab=2,ylim=c(10,110),axes = FALSE,type="l",lwd=16,col="lightgreen")
     axis(2);axis(side=1,at=1,labels=type[which(dat!="NaN")])
     lines(dat[dat!="NaN"],pch=17,lwd=8,col=terrain.colors(4),cex=c(10*.size[.size>0]/sum(.size[.size>0])),type="p")
     yy =as.vector(t(dat[dat!="NaN"])); grid()
-    text(x=c(1.1), y=yy+15,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
+    text(x=c(1.15,2.1,2.8), y=yy+17,labels=paste(as.character(yy),"%",sep=""),pos = 1,lwd=2, cex =1.2, col = "black",font=2)
   }
 }

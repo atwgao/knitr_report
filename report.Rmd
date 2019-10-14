@@ -20,6 +20,20 @@ knitr::opts_chunk$set(echo = TRUE, fig.align="center")
 
 ```{r echo = FALSE, fig.margin=TRUE, results = "asis"}
 load("write_info.RData")
+for(i in 1:nrow(our_info)) if(our_info$summary_decision1[i] == "") our_info$summary_decision1[i] = our_info$decision21[i]
+our_info = our_info[-c(which(our_info$decision7 == "")),]
+
+for(j in 1:nrow(our_info)){
+  if(our_info$evid[j] != ""){
+    if(our_info$decision[j] == ""){
+      our_info$decision[j] = our_info$evid[j]
+    }else{
+      if(our_info$decision4[j] == ""){
+        our_info$decision4[j] = our_info$evid[j]
+      }
+    }
+  }
+}
 input <- our_info
 
 # template <- paste("
@@ -29,16 +43,17 @@ input <- our_info
 # ")
 # dont't forget the newline
 
-
-for (i in seq(nrow(input)-1)) {
+j <- as.numeric(rownames(input))
+for (i in 1:length(j)) {
 current <- input[i, ]
 cat(paste0("# ",current$module,"\n"))
 cat(paste0("## Summary \n"))
 cat(paste0(current$summary_decision1, "\n"))
 cat(paste0(current$summary_decision2, "\n"))
+cat(paste0(current$summary_decision3))
 cat(paste0(current$summary_decision4, "\n"))
 cat(paste0("\n\n"))
-cat(paste0("![](", "pic", i, ".pdf){width=65%}","\n"))
+cat(paste0("![](", "pic", j[i], ".pdf){width=65%}","\n"))
 cat(paste0("\n\n"))
 cat(paste0("## Evidence \n"))
 cat(paste0(current$summary_stat, "\n\n"))
@@ -49,4 +64,30 @@ cat(paste0(current$decision5, "\n\n"))
 cat(paste0(current$decision7, "\n\n"))
 cat(paste0(current$decision8, "\n\n"))
 }
+# 
+# library(kableExtra)
+# nname <- vector()
+# nname[1] <- "Did tutorials help with impact blah"
+# nname[2] <- "Other things like aonva"
+# nname[3] <- "correlation or somethinglah"
+# nname[4] <- "even after other things"
+# 
+# names(our_info)[3:6] <-  c("table1", 'table2','table3','table4')#nname
+# our_info[, 3:6] %>%
+#   mutate(
+#     table1 = cell_spec(table1, "latex", color = ifelse(table1 == "No*", "red", "blue")),
+#     table2 = cell_spec(table2, "latex", color = ifelse(table2 == "No*", "red", "blue")),
+#     table3 = cell_spec(table3, "latex", color = ifelse(table3 == "No*", "red", "blue")),
+#     table4 = cell_spec(table4, "latex", color = ifelse(table4 == "No*", "red", "blue")),
+# 
+#   ) %>%
+# select(table1, table2, table3, table4) -> newTABLE
+# names(newTABLE) <- nname
+# newTABLE %>%  kable(format = "html", escape = F) %>%
+#   kable_styling("striped", full_width = F,repeat_header_method = "replace")
+
+<div>
+    <div>block 1
+    </div>
+</div>
 ```
