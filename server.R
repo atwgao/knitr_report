@@ -310,10 +310,10 @@ filedata <- reactive({
     # summary_table <- array(NA,dim=c(length(Modules),4))
     
     #Gather all the information needed to build the report
-    our_info <- data.frame(matrix(ncol=17,nrow=(1+length(Modules))))
+    our_info <- data.frame(matrix(ncol=18,nrow=(1+length(Modules))))
     names(our_info) <- c("module","evid","table1","table2","table3","table4","decision21",
                          "decision","decision3","decision4", "decision5","decision7","decision8",
-                         "summary_stat","summary_decision1","summary_decision2","summary_decision4")
+                         "summary_stat","summary_decision1","summary_decision2","summary_decision3","summary_decision4")
     
     group<-function(x){
       if(x==0){
@@ -335,6 +335,7 @@ filedata <- reactive({
     iii <- corr(Freq)
     our_info[1,]$table3 <- iii$table3
     our_info[1,]$table4 <- iii$table4
+    our_info[1,]$summary_decision3 <- iii$summary_decision3
     our_info[1,]$summary_decision4 <- iii$summary_decision4
     our_info[1,]$decision7 <- iii$decision7
     our_info[1,]$decision8 <- iii$decision8
@@ -352,7 +353,7 @@ filedata <- reactive({
     our_info[1,]$decision5 <- aaa$decision5
     
     tryCatch({
-      pdf(file=paste("images/pic",1,".pdf",sep=""),width = 8,height=8,pointsize = 18)
+      pdf(file=paste("images/pic",1,".pdf",sep=""),width = 8,height=8,pointsize = 16)
       print(funny(Freq))
       dev.off()
     }, error = function(e) return(NULL), warning = function(w) return(NULL))
@@ -375,6 +376,7 @@ filedata <- reactive({
           iii <- corr(Freq)
           our_info[i,]$table3 <- iii$table3
           our_info[i,]$table4 <- iii$table4
+          our_info[i,]$summary_decision3 <- iii$summary_decision3
           our_info[i,]$summary_decision4 <- iii$summary_decision4
           our_info[i,]$decision7 <- iii$decision7
           our_info[i,]$decision8 <- iii$decision8
@@ -390,6 +392,7 @@ filedata <- reactive({
         iii <- corr(Freq)
         our_info[i,]$table3 <- iii$table3
         our_info[i,]$table4 <- iii$table4
+        our_info[i,]$summary_decision3 <- iii$summary_decision3
         our_info[i,]$summary_decision4 <- iii$summary_decision4
         our_info[i,]$decision7 <- iii$decision7
         our_info[i,]$decision8 <- iii$decision8
@@ -401,6 +404,7 @@ filedata <- reactive({
         iii <- corr(Freq)
         our_info[i,]$table3 <- iii$table3
         our_info[i,]$table4 <- iii$table4
+        our_info[i,]$summary_decision3 <- iii$summary_decision3
         our_info[i,]$summary_decision4 <- iii$summary_decision4
         our_info[i,]$decision7 <- iii$decision7
         our_info[i,]$decision8 <- iii$decision8
@@ -421,6 +425,7 @@ filedata <- reactive({
         iii <- corr(Freq)
         our_info[i,]$table3 <- iii$table3
         our_info[i,]$table4 <- iii$table4
+        our_info[i,]$summary_decision3 <- iii$summary_decision3
         our_info[i,]$summary_decision4 <- iii$summary_decision4
         our_info[i,]$decision7 <- iii$decision7
         our_info[i,]$decision8 <- iii$decision8
@@ -438,7 +443,7 @@ filedata <- reactive({
         our_info[i,]$decision5 <- aaa$decision5
       }
       tryCatch({
-        pdf(file=paste("images/pic",i,".pdf",sep=""),width = 8,height=8,pointsize = 18)
+        pdf(file=paste("images/pic",i,".pdf",sep=""),width = 8,height=8,pointsize = 16)
         print(funny(Freq))
         dev.off()
       }, error = function(e) return(NULL), warning = function(w) return(NULL))
