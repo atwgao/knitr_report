@@ -56,8 +56,8 @@ our_info[, 3:6] %>%
   ) %>%
 select(Module, table1, table2, table3, table4) -> newTABLE
 names(newTABLE) <- nname
-newTABLE %>%  kable(format="markdown" ,escape = F,align = "c") %>%
-  kable_styling(position = "center") %>%
+newTABLE %>%  kable(format="markdown" ,escape = F,align = ) %>%
+  kable_styling("bordered",position = "center") %>%
   footnote(general = "Here is a general comments of the table. ",
            number = c("Footnote 1; ", "Footnote 2; "),
            alphabet = c("Footnote A; ", "Footnote B; "),

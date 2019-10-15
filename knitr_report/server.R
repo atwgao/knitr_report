@@ -387,7 +387,7 @@ filedata <- reactive({
         }
         our_info[i,]$evid <- paste("Less than 5 students did not attend tutorial sessions and thus the t-test and the ANOVA were not conducted")
       }else if(((length(Freq$Groupvec[Freq$Groupvec=="Group3"]))+(length(Freq$Groupvec[Freq$Groupvec=="Group2"])))<5) {
-        our_info[i,]$decision21   <- paste("Due to the small sample size there was no evidence to conclude on whether or not the final marks of students who attended at least one tutorial session are greater than the final marks of students who attended no tutorial sessions. However when conducting a correlation test on the small sample, we are able to conclude the following:")
+        our_info[i,]$decision21 <- paste("Due to the small sample size there was no evidence to conclude on whether or not the final marks of students who attended at least one tutorial session are greater than the final marks of students who attended no tutorial sessions. However when conducting a correlation test on the small sample, we are able to conclude the following:")
         our_info[i,]$summary_stat <- summary_stat(Freq)
         iii <- corr(Freq)
         our_info[i,]$table3 <- iii$table3
@@ -408,7 +408,7 @@ filedata <- reactive({
         our_info[i,]$summary_decision4 <- iii$summary_decision4
         our_info[i,]$decision7 <- iii$decision7
         our_info[i,]$decision8 <- iii$decision8
-
+        
         ttt <- ttest(Freq)
         our_info[i,]$table1           <- ttt$table1
         our_info[i,]$decision         <- ttt$decision

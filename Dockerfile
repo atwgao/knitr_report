@@ -18,8 +18,9 @@ RUN wget -qO- "https://yihui.name/gh/tinytex/tools/install-unx.sh" | sh
 # TODO: add further package if you need!
 RUN R -e "install.packages(c('shiny', 'shinydashboard','ppcor', 'dplyr','rmarkdown','DT'), repos='http://cran.rstudio.com/')"
 RUN R -e "install.packages(c('htmlwidgets', 'httpuv'), dependencies = TRUE)"
-RUN R -e "install.packages(c('shinyalert','Hmisc', 'plotly'), dependencies = TRUE)"
-RUN R -e "install.packages(c('kableExtra'), dependencies = TRUE)"
+RUN R -e "install.packages(c('shinyalert','Hmisc', 'plotly','kableExtra','shinyjs'), dependencies = TRUE)"
+RUN apt-get install -y libxml2-dev
+RUN R -e "install.packages('kableExtra', repos='http://cran.rstudio.com/')"
 # copy the app to the image
 RUN mkdir /root/knitr_report
 COPY knitr_report /root/knitr_report
