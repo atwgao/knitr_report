@@ -15,6 +15,7 @@ options(tinytex.verbose = TRUE)
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(echo = TRUE, fig.align="center")
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 ```
 
 
@@ -36,12 +37,34 @@ for(j in 1:nrow(our_info)){
 }
 input <- our_info
 
-# template <- paste("
-# 
-# %s %s
-# 
-# ")
-# dont't forget the newline
+##################################################
+nname <- vector()
+nname[1] <- "Module"
+nname[2] <- "Other things like aonva"
+nname[3] <- "correlation or somethinglah"
+nname[4] <- "even after other things"
+nname[5] <- "coree what what even after other things"
+
+names(our_info)[3:6] <-  c("table1", 'table2','table3','table4')#nname
+our_info[, 3:6] %>%
+  mutate(
+    Module = our_info$module,
+    table1 = text_spec(table1, "html", color = ifelse(table1 == "No*", "red", "blue")),
+    table2 = text_spec(table2, "html", color = ifelse(table2 == "No*", "red", "blue")),
+    table3 = text_spec(table3, "html", color = ifelse(table3 == "No*", "red", "blue")),
+    table4 = text_spec(table4, "html", color = ifelse(table4 == "No*", "red", "blue")),
+  ) %>%
+select(Module, table1, table2, table3, table4) -> newTABLE
+names(newTABLE) <- nname
+newTABLE %>%  kable(format="markdown" ,escape = F,align = "c") %>%
+  kable_styling(position = "center") %>%
+  footnote(general = "Here is a general comments of the table. ",
+           number = c("Footnote 1; ", "Footnote 2; "),
+           alphabet = c("Footnote A; ", "Footnote B; "),
+           symbol = c("Footnote Symbol 1; ", "Footnote Symbol 2")
+           )
+##################################################
+
 
 j <- as.numeric(rownames(input))
 for (i in 1:length(j)) {
@@ -64,26 +87,4 @@ cat(paste0(current$decision5, "\n\n"))
 cat(paste0(current$decision7, "\n\n"))
 cat(paste0(current$decision8, "\n\n"))
 }
-
-
-nname <- vector()
-nname[1] <- "Did tutorials help with impact blah"
-nname[2] <- "Other things like aonva"
-nname[3] <- "correlation or somethinglah"
-nname[4] <- "even after other things"
-
-names(our_info)[3:6] <-  c("table1", 'table2','table3','table4')#nname
-our_info[, 3:6] %>%
-  mutate(
-    table1 = cell_spec(table1, "html", color = ifelse(table1 == "No*", "red", "blue")),
-    table2 = cell_spec(table2, "html", color = ifelse(table2 == "No*", "red", "blue")),
-    table3 = cell_spec(table3, "html", color = ifelse(table3 == "No*", "red", "blue")),
-    table4 = cell_spec(table4, "html", color = ifelse(table4 == "No*", "red", "blue")),
-
-  ) %>%
-select(table1, table2, table3, table4) -> newTABLE
-names(newTABLE) <- nname
-newTABLE %>%  kable(format = "html", escape = F) %>%
-  kable_styling("striped", full_width = F,repeat_header_method = "replace")
-
 ```

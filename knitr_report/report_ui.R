@@ -22,8 +22,8 @@ report_ui <- function(){
                                 "RTP"="RTP",
                                 "PAS"="PAS"), 
                     selected = "NOR"),
-         selectizeInput("modular", "Modules",
-                        aggregate_modules,multiple = T),
+        selectizeInput("modular", "Modules",
+                       aggregate_modules,multiple = T),
         br(),
         tags$head(tags$script(src = "message-handler.js")),
         actionButton("generate","Compile report",icon= icon("running")),
@@ -32,25 +32,25 @@ report_ui <- function(){
         uiOutput("downloadReport"),
         #downloadButton("downloadReport", "Download report"),
         # ),
-      br(),
-      # disable(
+        br(),
+        # disable(
         radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
                      inline = TRUE)
       ),
       mainPanel(
-      # helpText('If the above fails, it is probably the API limit
-      #          reached (5 per minute). Refresh the page, or rerun the docker instance.'),
+        # helpText('If the above fails, it is probably the API limit
+        #          reached (5 per minute). Refresh the page, or rerun the docker instance.'),
         uiOutput("scatter"),
         verbatimTextOutput("event"),
         tags$hr(style="border-color: gray;"),
         column(6,
                plotOutput("plt2") 
-               ),
+        ),
         column(6,
                plotOutput("plt3") 
         )
-
+        
       )
-        )
-        )
-  }
+    )
+  )
+}
