@@ -19,7 +19,30 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 ```
 
 
-```{r echo = FALSE, fig.margin=TRUE, results = "asis"}
+
+##################################################
+
+# Executive Summary
+
+In the majority of the modules analysed, students who attended tutorials performed significantly better than students who did not.  There is some evidence to suggest that students who attend 5 or more tutorials perform even better than students who attend 1-4 tutorials, however this is not consistent over all modules. In the majority of modules, increased tutorial attendance is associated with improved academic performance even when previous academic performance is taken into consideration.
+
+## Introduction
+
+This is a report on the impact of the Academic student and excellence tutorial program (A_STEP) in the, _______ ,semester of, ______ ,in the, _________,  FACULTY. This report is based on the quantitative data analysis conducted in the modules which formed part of the A_STEP. The A_STEP program is based on the principles of Supplemental Instruction (SI) where high-risk modules are identified (as opposed to high risk students). In essence, when students learn collaboratively in high-quality tutorials which are facilitated by well-trained tutors they are more likely to master course material and be successful. The A_STEP encourages regular attendance of tutorials, and believes that continued participation over time plays an important role for student success. Towards the goal of continued improvement and critical self-reflection the A_STEP examines its impact on academic performance and evaluates tutors on a semester-by-semester basis. We analyzed a total of,_________,modules in the faculty that had A_STEP tutorial groups. Results of the analysis for all of these are presented in this report.
+
+## Understanding tutorial attendance in relation to academic performance
+
+The following section presents the findings from the analysis of tutorial attendance in relation to academic performance for each module in the faculty. Data obtained from attendance lists and academic performance is analysed to determine whether students who attend tutorials perform better academically than student who do not attend tutorials, and whether attending more than 5 tutorials makes a difference to academic performance. Furthermore, the relationship between academic performance and tutorial attendance is investigated, and the effect of previous academic performance in high school is taken into account in understanding this relationship. Finally, the relationship between tutorial attendance and academic performance is investigated within the top performing academic group and the lowest performing academic group. 
+
+For each module a summary of results is presented first to allow for an overall understanding of tutorial attendance in relation to academic performance. Thereafter, a section entitled ``Evidence`` is presented which details all of the results from the statistical analysis. 
+
+<!-- wdWrite("* Indicates a result with moderate to large effect sizes -->
+<!--         ** ") -->
+
+<div style="page-break-before: always;" />
+##################################################
+
+```{r echo = FALSE, out.width='.49\\linewidth', fig.margin=TRUE, results = "asis",fig.align='center'}
 load("write_info.RData")
 for(i in 1:nrow(our_info)) if(our_info$summary_decision1[i] == "") our_info$summary_decision1[i] = our_info$decision21[i]
 our_info = our_info[-c(which(our_info$decision7 == "")),]
@@ -34,37 +57,45 @@ for(j in 1:nrow(our_info)){
       }
     }
   }
+  
+  if(our_info$decision21[j] != ""){
+    our_info$table1[j] = our_info$table2[j] = "Not enough data to make inference**"
+  }
+  
 }
 input <- our_info
 
 ##################################################
+
 nname <- vector()
 nname[1] <- "Module"
-nname[2] <- "Other things like aonva"
-nname[3] <- "correlation or somethinglah"
-nname[4] <- "even after other things"
-nname[5] <- "coree what what even after other things"
+nname[2] <- "Do students who attend tutorials perform significantly better than students who do not?"
+nname[3] <- "Do students who attend 5+ tutorials perform better than students who attend 1-4 tutorials AND those who attend no tutorials?"
+nname[4] <- "Is there a significant positive correlation between tutorial attendance and academic performance?"
+nname[5] <- "If previous academic performance is taken into account, is there a significant positive correlation between tutorial attendance and academic performance?"
 
 names(our_info)[3:6] <-  c("table1", 'table2','table3','table4')#nname
 our_info[, 3:6] %>%
   mutate(
     Module = our_info$module,
-    table1 = text_spec(table1, "html", color = ifelse(table1 == "No*", "red", "blue")),
-    table2 = text_spec(table2, "html", color = ifelse(table2 == "No*", "red", "blue")),
-    table3 = text_spec(table3, "html", color = ifelse(table3 == "No*", "red", "blue")),
-    table4 = text_spec(table4, "html", color = ifelse(table4 == "No*", "red", "blue")),
+    table1 = text_spec(table1, "html", bold = TRUE, color = ifelse(table1 == "No*", "red", ifelse(table1 == "Yes*","blue","steelblue"))),
+    table2 = text_spec(table2, "html", bold = TRUE, color = ifelse(table2 == "No*", "red", ifelse(table2 == "Yes*","blue","steelblue"))),
+    table3 = text_spec(table3, "html", bold = TRUE, color = ifelse(table3 == "No*", "red", ifelse(table3 == "Yes*","blue","steelblue"))),
+    table4 = text_spec(table4, "html", bold = TRUE, color = ifelse(table4 == "No*", "red", ifelse(table4 == "Yes*","blue","steelblue"))),
   ) %>%
 select(Module, table1, table2, table3, table4) -> newTABLE
 names(newTABLE) <- nname
-newTABLE %>%  kable(format="markdown" ,escape = F,align = ) %>%
-  kable_styling("bordered",position = "center") %>%
-  footnote(general = "Here is a general comments of the table. ",
-           number = c("Footnote 1; ", "Footnote 2; "),
-           alphabet = c("Footnote A; ", "Footnote B; "),
-           symbol = c("Footnote Symbol 1; ", "Footnote Symbol 2")
+t1 <- newTABLE %>%  kable(format="html" ,escape = F,caption ="Table 1: Summaries of the primary findings from the analysis of tutorial attendance and academic performance summarized by module." ) %>%
+  kable_styling(c("stripped","bordered"),position = "center", full_width = F) %>%
+  footnote(general = "Some general comments of the table. ",
+           symbol = c("Indicates a result with moderate to large effect sizes \n** Indicates that the statistic was not determined either due to sample size or violation of assumptions. For details refer to the detailed discussion of evidence for the module.")
            )
-##################################################
+tryCatch({t1 %>%save_kable("mods_table.pdf")}, error = function(e) return(NULL), warnings = function(w) return(NULL))
 
+##################################################
+cat(paste0("![](","mods_table.pdf","){width=105%}","\n"))
+
+cat(paste0("\n\n"))
 
 j <- as.numeric(rownames(input))
 for (i in 1:length(j)) {
@@ -76,7 +107,7 @@ cat(paste0(current$summary_decision2, "\n"))
 cat(paste0(current$summary_decision3))
 cat(paste0(current$summary_decision4, "\n"))
 cat(paste0("\n\n"))
-cat(paste0("![](", "pic", j[i], ".pdf){width=65%}","\n"))
+cat(paste0("![](", "pic", j[i], ".pdf){width=80%}","\n"))
 cat(paste0("\n\n"))
 cat(paste0("## Evidence \n"))
 cat(paste0(current$summary_stat, "\n\n"))

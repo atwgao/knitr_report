@@ -14,6 +14,7 @@ report_ui <- function(){
         selectInput("semester", label = h4("SEMESTER"), 
                     choices = list("SEMESTER 1"="SEM1","SEMESTER 2"="SEM2"), 
                     selected = "SEM1"),
+        
         selectInput("tutor.type", label = h4("Tutorial program"), 
                     choices = c("USD" = "USD",
                                 "NOR" = "NOR",

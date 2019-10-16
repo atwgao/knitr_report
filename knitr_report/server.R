@@ -470,6 +470,7 @@ filedata <- reactive({
   
   output$downloadData01 <- downloadHandler(
     #############
+    #
     filename = function() {
       paste('report', sep = '.', switch(
         input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
@@ -479,6 +480,7 @@ filedata <- reactive({
       #Copy the report file to a temporary directory before processing it, in
       #case we don't have write permissions to the current working dir (which
       #can happen when deployed).
+      showModal(modalDialog("Please be petient, ASIS is putting together your document...", footer=NULL))
       tempfolder <- file.path(tempdir())
       pictures   <- list.files("images/",pattern = ".pdf", recursive = TRUE)
       for(i in 1:length(pictures)) file.copy(paste("images/",pictures[i],sep=""),tempfolder, overwrite = TRUE)
@@ -493,6 +495,7 @@ filedata <- reactive({
       # permission to the current working directory
       owd <- setwd(tempdir())
       on.exit(setwd(owd))
+      
       #on.exit(unlink(paste0(normalizePath(tempdir()), "/", dir(tempdir())), recursive = TRUE))
       
       library(rmarkdown)
@@ -502,8 +505,10 @@ filedata <- reactive({
       ) )
       #params = params,
       file.rename(out, file)
-    }
+  removeModal()
+        }
     ##########
+  #  removeModal()
     
   )
 }
