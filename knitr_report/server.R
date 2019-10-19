@@ -100,10 +100,19 @@ observeEvent(input$faculty,{
     
     output$plot1 <-  renderPlotly({
 
-         
+normalize <- function(values, actual_bounds, desired_bounds){
+  desired_bounds[1] -> min.y
+  desired_bounds[2] -> max.y
+  
+  actual_bounds[1] -> min.x
+  actual_bounds[2] -> max.x
+  result <- vector()
+  for(i in 1:length(values)){
+    result[i] <- min.y + (values[i]-min.x)*(max.y-min.y)/(max.x-min.x)  
+  }
+  return(result)
+}
 
-      
- #     print(
         df <- FreqData()%>%group_by(Module.Code, gr=cut(freq, breaks= c(0,1,5,20), right=F))%>%summarise(n = n(),mean=mean(FINAL.MARK))
         p <- df %>%
         plot_ly(
