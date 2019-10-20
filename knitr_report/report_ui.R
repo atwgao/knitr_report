@@ -36,7 +36,7 @@ report_ui <- function(){
         # disable(
         radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
                      inline = TRUE)
-      ),
+      ),  
       mainPanel(
         # helpText('If the above fails, it is probably the API limit
         #          reached (5 per minute). Refresh the page, or rerun the docker instance.'),

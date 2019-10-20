@@ -19,12 +19,13 @@ function(input, output, session) {
         })
         print(ui)
         ####################################################
-        observeEvent(input$file1,{
+        observeEvent(c(input$sep,input$file1),{
           if(data_being_collected == "attendance"){
             att_temp <<- filedata()
           }else{
             att_temp <- att_temp
           }
+          if(ncol(att_temp)>1){
           att_temp %>% mutate_if(is.factor, as.character) -> att_temp
           att_temp = att_temp%>%group_by(Tutor.Type,Acad.Group)%>%distinct(Module.Code)%>%dplyr::arrange(.by_group = T)
           
@@ -34,7 +35,7 @@ function(input, output, session) {
           law_mods = att_temp%>%filter(Acad.Group == "MLAW",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
           edu_mods = att_temp%>%filter(Acad.Group == "MEDU",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
           nas_mods = att_temp%>%filter(Acad.Group == "MNAS",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
-          output$mods2 <- renderText({"Copy and send the following modules to DIRAP when requesting for performance data (All campuses)"})
+          output$mods2 <- renderText({"Copy and send the following modules to DIRAP when requesting for performance data (All campuses): REQUEST THAT THEY SEND YOU PERFORMANCE DATA WITH THE FOLLOWING [precisely NAMED!!] VARIABLES: 'MODULE.CODE', 'STUDENT.NR', 'FACULTY', 'CAMPUS', 'FINAL.MARK', 'AP.SCORE'"})
           output$mods <- renderText({
             paste0("EMS Modules: ", toString(ems_mods),br(),br(),
             "HUM Modules: ", toString(hum_mods),br(),br(),
@@ -43,7 +44,7 @@ function(input, output, session) {
             "EDU Modules: ", toString(edu_mods),br(),br(),
             "NAS Modules: ", toString(nas_mods))
           })
-          
+          }
         })
         ####################################################
         
@@ -223,10 +224,14 @@ filedata <- reactive({
     e <<- e + 1
     
     if(e ==  1){
-      
-      write.csv(dat_temp, file = "~/attendance.csv")
+      print(ncol(dat_temp))
+      if(ncol(dat_temp)<2){
+        shinyalert("Please follow instructions!", "Either you chose the wrong delimiter or you're trying to upload incorrect data", type = "error")
+      }else{
+        write.csv(dat_temp, file = "~/attendance.csv")
       shinyalert("Awesome!", "Attendance data loaded succesfully, Now please load the performance data containing student marks", type = "success")
-    }
+      }
+      }
     if(e == 2){
       write.csv(dat_temp, file = "~/performance.csv")
       source("data_compile.R")
@@ -271,15 +276,10 @@ filedata <- reactive({
   })
   
 
-  observe({
+  observeEvent(input$modular,{
     shinyjs::disable("downloadReport")
   })
   
-  observeEvent(input$generate, {
-    session$sendCustomMessage(type = 'testmessage',
-                              message = 'Done !!.. Your report is ready for download')
-    shinyjs::enable("downloadReport")
-  })
   
   observeEvent(input$next_button, {
     session$sendCustomMessage(type = 'testmessage',
@@ -288,7 +288,7 @@ filedata <- reactive({
  
 
   observeEvent(input$generate, {
-
+    req(input$modular)
     showModal(modalDialog("Compiling...", footer=NULL))
     if(file.exists("complete_data.RData")) load("complete_data.RData")
     campus       <- isolate(input$campus)
@@ -365,7 +365,7 @@ filedata <- reactive({
     our_info[1,]$decision5 <- aaa$decision5
     
     tryCatch({
-      pdf(file=paste("images/pic",1,".pdf",sep=""),width = 8,height=8,pointsize = 16)
+      png(file=paste("images/pic",1,".png",sep=""),width = 6, height = 5, units = 'in', res = 200, pointsize = 11)
       print(funny(Freq))
       dev.off()
     }, error = function(e) return(NULL), warning = function(w) return(NULL))
@@ -455,7 +455,7 @@ filedata <- reactive({
         our_info[i,]$decision5 <- aaa$decision5
       }
       tryCatch({
-        pdf(file=paste("images/pic",i,".pdf",sep=""),width = 8,height=8,pointsize = 16)
+        png(file=paste("images/pic",i,".png",sep=""),width = 6, height = 5, units = 'in', res = 200, pointsize = 11)
         print(funny(Freq))
         dev.off()
       }, error = function(e) return(NULL), warning = function(w) return(NULL))
@@ -473,12 +473,20 @@ filedata <- reactive({
     
     save(our_info, file = "write_info.RData")
     removeModal()
+    session$sendCustomMessage(type = 'testmessage',
+                              message = 'Done !!.. Your report is ready for download')
+   #S if(length(input$modular) != 0 ) shinyjs::enable("downloadReport")
   })   
   
+
   output$downloadReport <- renderUI({
+    #print(as.numeric(input$generate))
     req(input$generate)
+    if(length(input$modular)!=0 & input$generate>0){
     downloadButton("downloadData01","Download Report")
-  })
+}
+        })
+  
   
   output$downloadData01 <- downloadHandler(
     #############
@@ -494,7 +502,7 @@ filedata <- reactive({
       #can happen when deployed).
       showModal(modalDialog("Please be petient, ASIS is putting together your document...", footer=NULL))
       tempfolder <- file.path(tempdir())
-      pictures   <- list.files("images/",pattern = ".pdf", recursive = TRUE)
+      pictures   <- list.files("images/",pattern = ".png", recursive = TRUE)
       for(i in 1:length(pictures)) file.copy(paste("images/",pictures[i],sep=""),tempfolder, overwrite = TRUE)
       #remove them from your image folder
       file.remove(paste("images/", list.files("images/"),sep=""))
@@ -518,7 +526,7 @@ filedata <- reactive({
       #params = params,
       file.rename(out, file)
   removeModal()
-        }
+  }
     ##########
   #  removeModal()
     

@@ -42,7 +42,7 @@ For each module a summary of results is presented first to allow for an overall 
 <div style="page-break-before: always;" />
 ##################################################
 
-```{r echo = FALSE, out.width='.49\\linewidth', fig.margin=TRUE, results = "asis",fig.align='center'}
+```{r, echo = FALSE}
 load("write_info.RData")
 for(i in 1:nrow(our_info)) if(our_info$summary_decision1[i] == "") our_info$summary_decision1[i] = our_info$decision21[i]
 our_info = our_info[-c(which(our_info$decision7 == "")),]
@@ -78,22 +78,27 @@ names(our_info)[3:6] <-  c("table1", 'table2','table3','table4')#nname
 our_info[, 3:6] %>%
   mutate(
     Module = our_info$module,
-    table1 = text_spec(table1, "html", bold = TRUE, color = ifelse(table1 == "No*", "red", ifelse(table1 == "Yes*","blue","steelblue"))),
-    table2 = text_spec(table2, "html", bold = TRUE, color = ifelse(table2 == "No*", "red", ifelse(table2 == "Yes*","blue","steelblue"))),
-    table3 = text_spec(table3, "html", bold = TRUE, color = ifelse(table3 == "No*", "red", ifelse(table3 == "Yes*","blue","steelblue"))),
-    table4 = text_spec(table4, "html", bold = TRUE, color = ifelse(table4 == "No*", "red", ifelse(table4 == "Yes*","blue","steelblue"))),
+    table1 = text_spec(table1, "html", bold = TRUE,font_size = 11, color = ifelse(table1 == "No*", "red", ifelse(table1 == "Yes*","blue","steelblue"))),
+    table2 = text_spec(table2, "html", bold = TRUE,font_size = 11, color = ifelse(table2 == "No*", "red", ifelse(table2 == "Yes*","blue","steelblue"))),
+    table3 = text_spec(table3, "html", bold = TRUE,font_size = 11, color = ifelse(table3 == "No*", "red", ifelse(table3 == "Yes*","blue","steelblue"))),
+    table4 = text_spec(table4, "html", bold = TRUE,font_size = 11, color = ifelse(table4 == "No*", "red", ifelse(table4 == "Yes*","blue","steelblue"))),
   ) %>%
 select(Module, table1, table2, table3, table4) -> newTABLE
 names(newTABLE) <- nname
 t1 <- newTABLE %>%  kable(format="html" ,escape = F,caption ="Table 1: Summaries of the primary findings from the analysis of tutorial attendance and academic performance summarized by module." ) %>%
-  kable_styling(c("stripped","bordered"),position = "center", full_width = F) %>%
+  kable_styling(c("stripped","bordered"),position = "center", full_width = F,font_size = 11) %>%
   footnote(general = "Some general comments of the table. ",
            symbol = c("Indicates a result with moderate to large effect sizes \n** Indicates that the statistic was not determined either due to sample size or violation of assumptions. For details refer to the detailed discussion of evidence for the module.")
            )
-tryCatch({t1 %>%save_kable("mods_table.pdf")}, error = function(e) return(NULL), warnings = function(w) return(NULL))
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+invisible(tryCatch({t1 %>%save_kable("mods_table.pdf")}, error = function(e) {#do nothing
+  }))
+```
 
+```{r, echo = FALSE, out.width='.35\\linewidth', fig.margin=TRUE, results = "asis",fig.align='center'}
 ##################################################
-cat(paste0("![](","mods_table.pdf","){width=105%}","\n"))
+cat(paste0("![](","mods_table.pdf","){width=110%}","\n"))
 
 cat(paste0("\n\n"))
 
@@ -107,7 +112,7 @@ cat(paste0(current$summary_decision2, "\n"))
 cat(paste0(current$summary_decision3))
 cat(paste0(current$summary_decision4, "\n"))
 cat(paste0("\n\n"))
-cat(paste0("![](", "pic", j[i], ".pdf){width=80%}","\n"))
+cat(paste0("![](", "pic", j[i], ".png){width=60%}","\n"))
 cat(paste0("\n\n"))
 cat(paste0("## Evidence \n"))
 cat(paste0(current$summary_stat, "\n\n"))

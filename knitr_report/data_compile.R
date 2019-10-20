@@ -1,5 +1,8 @@
 #***********************************************load Performance Data
 mark <- read.csv("~/performance.csv")
+if(ncol(mark)<=2){
+  stop("IncorreSS")
+}
 #*********************************************load Attendence data
 att <-read.csv("~/attendance.csv")
 
@@ -11,24 +14,31 @@ if(any(a1%in%a2)==T){
   }
 }
 
-x<-att$Term
-i<-c(1:length(x))
-att$YEAR <- sapply(i,function(i) return(paste("201",substr(x[i],3,3),sep="")))
+# x<-att$Term
+# i<-c(1:length(x))
+# att$YEAR <- sapply(i,function(i) return(paste("201",substr(x[i],3,3),sep="")))
 
-mcode <- agrep("Module.Code", names(mark),value=T,max=3,ignore.case = TRUE)
-stdno <- agrep("STUDENT.NR", names(mark),value=T,max=2)
-emplid <- agrep("EMPLID", names(mark),value=T,max=2)
+mcode <- agrep("Module_Code", names(mark),value=T,max=3,ignore.case = TRUE)
+stdno <- agrep("STUDENT.NR", names(mark),value=T,max=1)
+emplid <- agrep("EMPLID", names(mark),value=T,max=1)
 stdno <- ifelse(length(emplid)==0,stdno,emplid)
-facult <- agrep("FACULTY", names(mark),value=T,max=3,ignore.case = TRUE)
-camp <- agrep("Campus", names(mark),value=T,max=3,ignore.case = TRUE)
+facult <- agrep("FACULTY", names(mark),value=T,max=1,ignore.case = TRUE)
+camp <- agrep("Campus", names(mark),value=T,ignore.case = TRUE,max = 1)
+finalMarks <- agrep("FINAL.MARKS", names(mark),value=T,ignore.case = TRUE,max = 2)
+apScore <- agrep("AP SCORE", names(mark),value=T,ignore.case = TRUE,max = 2)
 
-names(mark)[names(mark)==mcode] <- "Module.Code"
-names(mark)[names(mark)==stdno] <- "Attendee"
-names(mark)[names(mark)==facult]<- "FACULTY"
-names(mark)[names(mark)==camp]  <- "Campus"
+names(mark)[names(mark)==mcode[1]]  <- "Module.Code"
+names(mark)[names(mark)==stdno[1]]  <- "Attendee"
+names(mark)[names(mark)==facult[1]] <- "FACULTY"
+names(mark)[names(mark)==camp[1]]  <- "Campus"
+names(mark)[names(mark)==finalMarks[1]]  <- "FINAL.MARK"
+names(mark)[names(mark)==apScore[1]]  <- "GR_12_ADSCORE"
 
-mark$UID = paste(mark$YEAR,mark$Attendee,mark$Module.Code,sep="")
-att$UID  = paste(att$YEAR,att$Attendee,att$Module.Code,sep="")
+
+mark <- mark%>%select(Module.Code,Attendee,FACULTY,Campus,FINAL.MARK,GR_12_ADSCORE)
+
+mark$UID = paste(mark$Attendee,mark$Module.Code,sep="")
+att$UID  = paste(att$Attendee,att$Module.Code,sep="")
 
 mark <- mark %>% mutate_if(is.factor, as.character)
 mark.trim <- mark #
@@ -43,8 +53,8 @@ consol_data <- consol_data[consol_data$Module.Code%in%Modules,]
 
 .Excluded<-(mark.trim[!mark.trim$UID%in%att[att$Tutor.Type=="NOR",]$UID,])
 
-.GroupedData1<-consol_data %>% group_by(Attendee,Module.Code,YEAR,Campus,FACULTY,GR_12_ADSCORE,FINAL.MARK,Tutor.Type)%>%summarise(freq=n())
-.GroupedData2<-.Excluded %>% group_by(Attendee,Module.Code,YEAR,Campus,FACULTY,GR_12_ADSCORE,FINAL.MARK)%>%summarise(Tutor.Type="NOR",freq=0)#%>%mutate(Tutor.Type="NOR",freq=0)
+.GroupedData1<-consol_data %>% group_by(Attendee,Module.Code,Campus,FACULTY,GR_12_ADSCORE,FINAL.MARK,Tutor.Type)%>%summarise(freq=n())
+.GroupedData2<-.Excluded %>% group_by(Attendee,Module.Code,Campus,FACULTY,GR_12_ADSCORE,FINAL.MARK)%>%summarise(Tutor.Type="NOR",freq=0)#%>%mutate(Tutor.Type="NOR",freq=0)
 
 colnames(.GroupedData2)<-colnames(.GroupedData1)
 GroupedData<-rbind(.GroupedData1,.GroupedData2)
