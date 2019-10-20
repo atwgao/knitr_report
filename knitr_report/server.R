@@ -127,12 +127,15 @@ normalize <- function(values, actual_bounds, desired_bounds){
             "<b>Performance per Module</b><br><br>",
             "Tutorial Attendance: %{y}<br>",
             "Mark Average: %{x:,.02f}%<br>",
-            "Scaled student population: %{marker.size:,.0f}",
+            #"Scaled student population: %{marker.size:,.0f}",
             "<extra></extra>"
           ),
           # hoverinfo = "text",
           type = 'scatter',
-          mode = 'markers', alpha = 0.5)%>% layout(xaxis = x, yaxis = y)
+          mode = 'markers', alpha = 0.5)%>% layout(xaxis = x, yaxis = y)%>% 
+          animation_opts(
+            1000, easing = "elastic", redraw = FALSE
+          )
      # )
       ggplotly(p)
       
