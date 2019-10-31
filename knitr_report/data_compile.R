@@ -1,7 +1,7 @@
 #***********************************************load Performance Data
 mark <- read.csv("~/performance.csv")
 if(ncol(mark)<=2){
-  stop("IncorreSS")
+  stop("Incorrect data")
 }
 #*********************************************load Attendence data
 att <-read.csv("~/attendance.csv")

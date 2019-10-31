@@ -214,7 +214,7 @@ filedata <- reactive({
   
   observe(e <<- 0)
   observeEvent(input$next_button, {
-    showModal(modalDialog("Please be petient, ASIS is processing your data ...", footer=NULL))
+    showModal(modalDialog("Please be patient, ASIS is processing your data ...", footer=NULL))
     dat_temp <- filedata()
     data_being_collected <<- "performance";
     output$page <- renderUI({
