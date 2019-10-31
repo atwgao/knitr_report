@@ -11,7 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # System doc
 The ASIS reporting application is written using the [__R Shiny__](https://shiny.rstudio.com/) web development framework. The project includes 9 [__R__](https://www.r-project.org/) header scripts and one [__rmarkdown__](https://rmarkdown.rstudio.com/) written using knitr.
 
-This is a private repository containing the ASIS project CTL project for generating impact reports using student attendance and performance data. This repository is maintained by [__xdelta analytics__](https://www.xdelta.co.za).
+This is a private repository containing the ASIS 
+-CTL project for generating impact reports using student attendance and performance data. This repository is maintained by [__xdelta analytics__](https://www.xdelta.co.za).
 
 ## Software Requirements
 You will need to install the following software on your system to edit or configure the r scripts, markdown files, the yaml files, dockerfile and header files. For testing and deployment. For the docker image, these requirements are already listed in the dockerfile.

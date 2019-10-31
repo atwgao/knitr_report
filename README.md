@@ -10,7 +10,7 @@ project includes 9 [**R**](https://www.r-project.org/) header scripts
 and one [**rmarkdown**](https://rmarkdown.rstudio.com/) written using
 knitr.
 
-This is a private repository containing the ASIS project CTL project for
+This is a private repository containing the ASIS -CTL project for
 generating impact reports using student attendance and performance data.
 This repository is maintained by [**xdelta
 analytics**](https://www.xdelta.co.za).
