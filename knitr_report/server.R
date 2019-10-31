@@ -206,7 +206,7 @@ filedata <- reactive({
     return(df)
   })
   
-  #Download DATA ########################################
+  #Download DATA ##########################################
   
   output$contents <- DT::renderDataTable(
     filedata(),
