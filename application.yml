@@ -1,0 +1,53 @@
+proxy:
+  title: UFS Centre for teaching and learning dashboards
+  logo-url: https://www.ufs.ac.za/images/librariesprovider5/ufs_redesign/ufs-transparent-logo.png?sfvrsn=db26d021_2
+  landing-page: /
+  heartbeat-rate: 10000
+  heartbeat-timeout: 60000
+  port: 8080
+  authentication: simple
+  admin-groups: tlcs
+  # Example: 'simple' authentication configuration
+  users:
+  - name: evodia
+    password: password
+    groups: tlcs
+  - name: malejakane
+    password: lejakane
+    groups: tlcs
+  - name: gao
+    password: password
+    groups: tlcs
+  # Example: 'ldap' authentication configuration
+  ldap:
+    url: ldap://ldap.forumsys.com:389/dc=example,dc=com
+    user-dn-pattern: uid={0}
+    group-search-base:
+    group-search-filter: (uniqueMember={0})
+    manager-dn: cn=read-only-admin,dc=example,dc=com
+    manager-password: password
+  # Docker configuration
+  docker:
+    cert-path: /home/none
+    url: http://localhost:2375
+    port-range-start: 20000
+  specs:
+  - id: 01_asis
+    display-name: ASIS
+    description: This application generates A_STEP impact reports
+    container-image: atwgao/knitr_report:asis4 
+    access-groups: [tlcs]
+#  - id: 06_tabsets
+#    container-cmd: ["R", "-e", "shinyproxy::run_06_tabsets()"]
+#    container-image: openanalytics/shinyproxy-demo
+#    access-groups: scientists
+
+spring:
+  servlet:
+   multipart:
+    max-file-size: 500MB
+    max-request-size: 500MB
+
+logging:
+  file:
+    shinyproxy.log
