@@ -18,6 +18,15 @@ proxy:
   - name: gao
     password: password
     groups: tlcs
+  - name: motake
+    password: masuhle
+    groups: tlcs
+  - name: thabiso
+    password: password
+    groups: tlcs
+  - name: providance
+    password: password
+    groups: tlcs
   # Example: 'ldap' authentication configuration
   ldap:
     url: ldap://ldap.forumsys.com:389/dc=example,dc=com
