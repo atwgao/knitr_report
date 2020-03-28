@@ -1,0 +1,3 @@
+#In order to reroute all requests from 80 to 8080, run the following
+
+sudo iptables -t nat -I PREROUTING -p tcp --dplort 80 -j REDIRECT --to-ports 8080
