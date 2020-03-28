@@ -1,5 +1,5 @@
 # Install lastest version of R
-FROM r-base
+FROM r-base:3.5.3
 
 # Install Ubuntu packages
 RUN apt-get update && apt-get install -y \
@@ -16,7 +16,7 @@ RUN wget -qO- "https://yihui.name/gh/tinytex/tools/install-unx.sh" | sh
 
 # Install R packages that are required
 # TODO: add further package if you need!
-RUN R -e "install.packages(c('shiny', 'dplyr', 'shinydashboard','ppcor','rmarkdown','DT'), repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages(c('shiny', 'dplyr', 'shinydashboard','ppcor','rmarkdown','DT'))"
 RUN R -e "install.packages(c('htmlwidgets', 'httpuv'), dependencies = TRUE)"
 RUN R -e "install.packages(c('shinyalert', 'plotly', 'Hmisc','kableExtra','shinyjs'), dependencies = TRUE)"
 RUN apt-get install -y libxml2-dev
