@@ -196,7 +196,7 @@ if(nrow(Freq[Freq$freq==0,])!=0){
   return(decision9)
 }
 
-funny<-function(Freq){
+plotting_fun<-function(Freq){
   dat<-c(round(mean(Freq[Freq$freq==0,]$FINAL.MARK),2),round(mean(Freq[Freq$freq<=4&Freq$freq>0,]$FINAL.MARK),2),round(mean(Freq[Freq$freq>4,]$FINAL.MARK),2))
   .size <- c(round(length(Freq[Freq$freq==0,]$FINAL.MARK),2),round(length(Freq[Freq$freq<=4&Freq$freq>0,]$FINAL.MARK),2),round(length(Freq[Freq$freq>4,]$FINAL.MARK),2))
   par(mar = c(9,9,2,4))

@@ -5,6 +5,7 @@ function(input, output, session) {
   
   observe({
     if(file.exists("complete_data.RData")){
+      #This e variable is declared globally and used to cache the UI being used.
       e <<- 3
       output$page <- renderUI({
        div(class="outer",do.call(fluidPage,c(inverse=TRUE,title = paste("You're logged in as", isolate(input$userName)),report_ui())))
@@ -26,15 +27,18 @@ function(input, output, session) {
             att_temp <- att_temp
           }
           if(ncol(att_temp)>1){
+          #Create a temporary attendance data frame
           att_temp %>% mutate_if(is.factor, as.character) -> att_temp
+          #Extract the modules outo this temporary dataframe.
           att_temp = att_temp%>%group_by(Tutor.Type,Acad.Group)%>%distinct(Module.Code)%>%dplyr::arrange(.by_group = T)
-          
+          #allocate to these variables, all the modules to be pasted in the main panel of the data collection UI...
           ems_mods = att_temp%>%filter(Acad.Group == "MEMS",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code%>%as.vector()
           hum_mods = att_temp%>%filter(Acad.Group == "MHUM",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
           hsc_mods = att_temp%>%filter(Acad.Group == "MHSC",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
           law_mods = att_temp%>%filter(Acad.Group == "MLAW",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
           edu_mods = att_temp%>%filter(Acad.Group == "MEDU",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
           nas_mods = att_temp%>%filter(Acad.Group == "MNAS",Tutor.Type == "NOR")%>%distinct(Module.Code)%>%.$Module.Code
+          #All this text is paste under the Modules view dataframe
           output$mods2 <- renderText({"Copy and send the following modules to DIRAP when requesting for performance data (All campuses): REQUEST THAT THEY SEND YOU PERFORMANCE DATA WITH THE FOLLOWING [precisely NAMED!!] VARIABLES: 'MODULE.CODE', 'STUDENT.NR', 'FACULTY', 'CAMPUS', 'FINAL.MARK', 'AP.SCORE'"})
           output$mods <- renderText({
             paste0("EMS Modules: ", toString(ems_mods),br(),br(),
@@ -58,8 +62,7 @@ function(input, output, session) {
     }
     
   })
-  
-  
+  #This data is used for generating impact reports and is generated during runtime... From the complete_data object
   FreqData <- reactive({
     if(file.exists("complete_data.RData")) load("complete_data.RData")
     campus       <- (input$campus)
@@ -67,11 +70,13 @@ function(input, output, session) {
     semester     <- (input$semester)
     tutor.type   <- (input$tutor.type)
     .Modules     <- (input$modular)
+    #Ensure that AP score is properly labeled
     names(GroupedData)[names(GroupedData)=="GR_12_ADSCORE"]<-"AP"
     Freq3<-GroupedData%>%filter(Campus==campus,FACULTY==faculty,Term==semester, Tutor.Type==tutor.type)%>%group_by(Attendee,Module.Code,FINAL.MARK,AP,freq)%>%dplyr::summarize()%>%as.data.frame() ##,Tutor.Type==tutor.type
     #Freq3
   })   
 
+  #These are font specs for the animated plot in the main panel of the reporting ui.
   f <- list(
     family = "Courier New, monospace",
     size = 18,
@@ -101,19 +106,20 @@ observeEvent(input$faculty,{
     
     output$plot1 <-  renderPlotly({
 
+#normalize the student population to have proportionally sized points in your plot.
 normalize <- function(values, actual_bounds, desired_bounds){
   desired_bounds[1] -> min.y
   desired_bounds[2] -> max.y
-  
+
   actual_bounds[1] -> min.x
   actual_bounds[2] -> max.x
   result <- vector()
   for(i in 1:length(values)){
-    result[i] <- min.y + (values[i]-min.x)*(max.y-min.y)/(max.x-min.x)  
+    result[i] <- min.y + (values[i]-min.x)*(max.y-min.y)/(max.x-min.x)
   }
   return(result)
 }
-
+        #Pull the Data generating function and aggregate your data for plotting...
         df <- FreqData()%>%group_by(Module.Code, gr=cut(freq, breaks= c(0,1,5,20), right=F))%>%summarise(n = n(),mean=mean(FINAL.MARK))
         p <- df %>%
         plot_ly(
@@ -145,9 +151,8 @@ normalize <- function(values, actual_bounds, desired_bounds){
 
   plotlyOutput("plot1")
   })
-  
-  
-  
+  x
+  #Plot the geom trend lines 
   output$plt2 <- renderPlot({
     req(input$modular)
 
@@ -500,7 +505,7 @@ filedata <- reactive({
       #Copy the report file to a temporary directory before processing it, in
       #case we don't have write permissions to the current working dir (which
       #can happen when deployed).
-      showModal(modalDialog("Please be petient, ASIS is putting together your document...", footer=NULL))
+      showModal(modalDialog("Please be patient, ASIS is putting together your document...", footer=NULL))
       tempfolder <- file.path(tempdir())
       pictures   <- list.files("images/",pattern = ".png", recursive = TRUE)
       for(i in 1:length(pictures)) file.copy(paste("images/",pictures[i],sep=""),tempfolder, overwrite = TRUE)
