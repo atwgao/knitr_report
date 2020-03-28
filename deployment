@@ -1,3 +1,9 @@
+#Deployment
+nohup java -jar shinyproxy-2.3.0.jar
+
+#Debug deployment
+java -jar shinyproxy-2.3.0.jar
+
 #In order to reroute all requests from 80 to 8080, run the following
 
 sudo iptables -t nat -I PREROUTING -p tcp --dplort 80 -j REDIRECT --to-ports 8080
